@@ -17,4 +17,4 @@ author: "BA8BLK"
 
 天空中有信号，代码里有梦想。
 
-![](Pasted%20image%2020260301150005.png)
+![](public/images/Pasted%20image%2020260301150908.png)

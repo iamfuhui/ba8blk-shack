@@ -1,7 +1,9 @@
 {
   "newFileLocation": "folder",
-  "newFileFolderPath": "public/images",
+  "newFileFolderPath": "src/content/blog",
   "useMarkdownLinks": true,
   "newLinkFormat": "absolute",
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "public/images",
+  "promptDelete": false
 }
