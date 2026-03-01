@@ -44,3 +44,40 @@ em, i {
 .crt-effect {
   display: none;
 }
+/* 针对博客内容区域的图片 */
+/* --- BA8BLK Blog Image Style (Scheme B) --- */
+
+.prose img {
+  /* 基础布局 */
+  display: block;
+  max-width: 95%;           /* 不顶满，留出呼吸感 */
+  height: auto;
+  margin: 2.5rem 0 0.8rem 0; /* 靠左站，上方留白大，下方紧贴描述文字 */
+  
+  /* 装饰细节 */
+  border-radius: 6px;       /* 柔和的微圆角 */
+  border: 1px solid #f0f0f0; /* 极淡的灰边，仅起界限作用 */
+  background-color: #fff;
+  
+  /* 动画核心：方案 B 的微放大效果 */
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* 这种曲线比 ease 更丝滑 */
+  cursor: zoom-in;          /* 鼠标移上去变成放大镜手势，暗示可看大图 */
+}
+
+/* 方案 B：悬停动效 */
+.prose img:hover {
+  transform: scale(1.02);   /* 整体平滑放大 2% */
+  /* 这里不再修改 border-color，保持干净 */
+}
+
+/* 图片下方的斜体描述文字 (Markdown: *描述文字*) */
+.prose img + em {
+  display: block;
+  font-size: 0.85rem;       /* 稍小的字号 */
+  font-style: normal;       /* 取消斜体，改用颜色区分 */
+  color: #a0a0a0;           /* 浅灰色 */
+  margin-bottom: 3rem;      /* 描述文字下方留出较大的段落间距 */
+  padding-left: 2px;
+}
+
+/* --- End of Style --- */
