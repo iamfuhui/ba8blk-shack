@@ -1,8 +1,11 @@
-/** @type {import('tailwindcss').Config} */
-export default {
-	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
-	theme: {
-		extend: {},
-	},
-	plugins: [],
-}
+import { defineConfig } from 'astro/config';
+import tailwind from '@astrojs/tailwind'; // 确保有这一行
+
+export default defineConfig({
+  integrations: [
+    tailwind({
+      // 如果你没有 tailwind.config.mjs，可以在这里手动指定配置
+      applyBaseStyles: true,
+    })
+  ],
+});

@@ -1,0 +1,75 @@
+---
+import { getCollection } from 'astro:content';
+
+// 1. 生成所有文章的路径
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
+}
+
+// 2. 获取当前文章数据
+const post = Astro.props;
+const { Content } = await post.render();
+---
+
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{post.data.title} // BA8BLK</title>
+    
+    <style is:global>
+      /* Tailwind v4 核心引入 */
+      @import "tailwindcss";
+      /* 引入排版插件，确保内容美观 */
+      @plugin "@tailwindcss/typography";
+
+      @theme {
+        /* 在这里可以定义你的品牌色 */
+        --color-accent: #2563eb; 
+      }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased font-sans">
+    <nav class="max-w-3xl mx-auto px-6 py-12">
+        <a href="/blog" class="text-sm font-mono text-accent hover:underline flex items-center gap-2">
+            <span class="text-lg">←</span> RETURN_TO_LOG_LIST
+        </a>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6 pb-24">
+        <header class="mb-12 border-b border-slate-100 pb-12">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="px-2 py-1 bg-slate-100 text-slate-500 text-xs font-mono rounded">STATION_LOG</span>
+                <time class="text-sm font-mono text-slate-400">
+                    {new Date(post.data.pubDate).toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    })}
+                </time>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
+                {post.data.title}
+            </h1>
+
+            {post.data.description && (
+                <p class="mt-6 text-xl text-slate-500 leading-relaxed font-serif italic">
+                    {post.data.description}
+                </p>
+            )}
+        </header>
+
+        <article class="prose prose-slate prose-lg max-w-none 
+            prose-headings:text-slate-900 prose-headings:font-bold
+            prose-a:text-accent hover:prose-a:text-blue-500
+            prose-code:before:content-none prose-code:after:content-none
+            prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded
+            prose-pre:bg-slate-900 prose-pre:text-slate-200
+            prose-img:rounded-xl prose-img:shadow-md">
+            <Content />
+        </article>
