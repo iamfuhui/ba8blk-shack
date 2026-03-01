@@ -17,4 +17,4 @@ author: "BA8BLK"
 
 天空中有信号，代码里有梦想。
 
-![](../../../public/images/image-20260301150908.png)
+![](images/image-20260301150908.png)
