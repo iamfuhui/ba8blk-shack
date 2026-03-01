@@ -1,0 +1,116 @@
+---
+import '../styles/global.css';
+
+// 1. 获取访客实时数据 (Cloudflare 提供)
+// 在本地开发环境，这些值可能为 null，所以我们提供回退字符串
+const country = Astro.request.headers.get('cf-ipcountry') || 'CN';
+const city = Astro.request.headers.get('cf-ipcity') || 'CHENGDU';
+const ip = Astro.request.headers.get('cf-connecting-ip') || '127.0.0.1';
+const browser = Astro.request.headers.get('user-agent')?.split(' ')[0] || 'UNKNOWN_TERMINAL';
+
+// 2. 格式化数据，增强“电台感”
+const maskedIp = ip.split('.').slice(0, 2).join('.') + '.x.x';
+const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+
+// 3. 随机信号强度模拟 (用于增加真实感)
+const signalStrength = Math.floor(Math.random() * 4) + 6; // 模拟 S6-S9 的信号强度
+---
+
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ABOUT // BA8BLK</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" />
+</head>
+<body class="bg-[#fbfbfb] text-[#171717] antialiased font-['JetBrains_Mono','Noto_Sans_SC']">
+    
+    <main class="max-w-2xl mx-auto px-6 pt-24 pb-32">
+        <nav class="mb-16">
+            <a href="/" class="text-xs font-bold text-black/30 hover:text-black transition-all flex items-center gap-2">
+                <span>&larr;</span> RETURN_TO_CONSOLE
+            </a>
+        </nav>
+
+        <section class="mb-24">
+            <h1 class="text-4xl font-[900] text-black tracking-tighter mb-8 uppercase">关于我 / About</h1>
+            <article class="prose prose-neutral max-w-none 
+                prose-p:text-black/80 prose-p:leading-relaxed 
+                prose-blockquote:border-[#059669] prose-blockquote:bg-transparent prose-blockquote:not-italic">
+                <p>这里是 <strong>BA8BLK</strong>，一名位于中国第8区的业余无线电爱好者。</p>
+                <p>本站是我个人的数字通联日志，记录关于无线电技术、代码开发以及生活中的零散信号。我坚信在这个高度连接的时代，依然有些信号值得跨越山海去捕捉。</p>
+                <blockquote>
+                    73 是我们最诚挚的敬意，是对远方友谊的最终确认。
+                </blockquote>
+            </article>
+        </section>
+
+        <section class="border border-black/10 bg-black/[0.02] p-8 rounded-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-40"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-[#059669]"></span>
+                    </div>
+                    <h2 class="text-xs font-bold tracking-[0.2em] text-[#059669] uppercase">Terminal_Signal_Monitor</h2>
+                </div>
+                <span class="text-[9px] font-mono opacity-30 uppercase tracking-widest">Scanning_Active...</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-12 mb-10">
+                <div>
+                    <p class="text-[9px] uppercase font-bold opacity-30 mb-2 tracking-widest">Cumulative_Hits</p>
+                    <p class="text-3xl font-mono font-bold tracking-tighter" id="busuanzi_value_site_pv">----</p>
+                </div>
+                <div>
+                    <p class="text-[9px] uppercase font-bold opacity-30 mb-2 tracking-widest">Unique_Callsigns</p>
+                    <p class="text-3xl font-mono font-bold tracking-tighter" id="busuanzi_value_site_uv">----</p>
+                </div>
+            </div>
+
+            <div class="bg-black/5 p-5 rounded-sm font-mono text-[11px] leading-relaxed mb-8">
+                <p class="text-[#059669] font-bold mb-3 border-b border-[#059669]/20 pb-1">LAST_INCOMING_PACKET_DECODED:</p>
+                <div class="space-y-1.5 opacity-80">
+                    <div class="flex justify-between">
+                        <span>ORIGIN:</span>
+                        <span class="text-black font-bold uppercase">{city}, {country}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>SOURCE_IP:</span>
+                        <span class="text-black font-bold">{maskedIp}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>TIMESTAMP:</span>
+                        <span class="text-black font-bold italic">{timestamp}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>TERMINAL:</span>
+                        <span class="text-black font-bold uppercase">{browser}</span>
+                    </div>
+                    <div class="flex justify-between border-t border-black/5 mt-2 pt-2">
+                        <span>SIGNAL_REPORT:</span>
+                        <span class="text-[#059669] font-bold animate-pulse">S{signalStrength} // CARRIER_DETECTED</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-10 flex items-end gap-[2px] opacity-[0.08]">
+                {Array.from({ length: 40 }).map(() => (
+                    <div class="bg-black w-full" style={`height: ${Math.random() * 100}%`}></div>
+                ))}
+            </div>
+            
+            <p class="mt-4 text-[9px] opacity-20 font-mono text-center tracking-tighter">
+                NOTICE: ALL DATA IS VOLATILE AND PRIVACY-PROTECTED. NO COOKIES USED.
+            </p>
+        </section>
+
+        <footer class="mt-32 pt-20 border-t border-black/5 flex justify-between items-center opacity-20 text-[20px] tracking-[0.3em] uppercase">
+            <span>Operator: BA8BLK</span>
+            <span>Signal Out // 73</span>
+        </footer>
+    </main>
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</body>
+</html>
