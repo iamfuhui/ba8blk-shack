@@ -1,62 +1,57 @@
 ---
+import '../styles/global.css';
 import { getCollection } from 'astro:content';
-
-const posts = (await getCollection('blog')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
-
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>STATION LOGS // BA8BLK</title>
-    <style is:global>
-  /* 1. 直接引入 Tailwind 主文件，这会自动加载基础布局和 CSS 重置 */
-  @import "tailwindcss";
-
-  /* 2. 如果你需要自定义颜色，才使用 @theme 块 */
-  @theme {
-    --color-brand-green: #00ff41;
-  }
-</style>
+    <title>LOGS // BA8BLK</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" />
 </head>
-<body class="bg-[#fcfcfc] text-slate-800 antialiased font-sans">
-    <div class="max-w-3xl mx-auto px-6 py-20">
-        <header class="mb-16">
-            <a href="/" class="text-blue-600 hover:text-blue-800 transition-colors font-mono text-sm group">
-                <span class="inline-block transform group-hover:-translate-x-1 transition-transform">←</span> RETURN_TO_CONSOLE
-            </a>
-            <div class="mt-8">
-                <h1 class="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">Station Logs.</h1>
-                <p class="mt-4 text-lg text-slate-500 font-serif italic">BA8BLK Radio Station Technical Journals & Amateur Radio Logs.</p>
+<body class="bg-[#fbfbfb] text-[#171717] antialiased font-['JetBrains_Mono','Noto_Sans_SC']">
+    
+    <main class="max-w-3xl mx-auto px-6 py-24">
+        <header class="mb-20">
+            <div class="flex items-end justify-between border-b border-black/5 pb-6">
+                <div>
+                    <h1 class="text-3xl font-black tracking-tighter text-black uppercase">Archive</h1>
+                    <p class="text-[10px] text-[#059669] font-bold tracking-[0.3em] mt-2">BA8BLK's Blog</p>
+                </div>
+                <a href="/" class="text-[10px] text-black/40 hover:text-black transition-all border border-black/10 px-2 py-1 uppercase">
+                    Back to Home
+                </a>
             </div>
         </header>
 
-        <main>
-            <div class="space-y-12">
-                {posts.map((post) => (
-                    <article class="group relative flex flex-col items-start">
-                        <time class="order-first mb-3 flex items-center text-sm text-slate-400 font-mono">
-                            <span class="h-4 w-0.5 rounded-full bg-slate-200 mr-3"></span>
-                            {new Date(post.data.pubDate).toLocaleDateString('zh-CN')}
+        <div class="space-y-12">
+            {sortedPosts.map(post => (
+                <article class="group">
+                    <a href={`/blog/${post.slug}`} class="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-10">
+                        <time class="font-mono text-sm text-black/20 shrink-0 min-w-[100px]">
+                            {post.data.pubDate.toLocaleDateString('zh-CN', {year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '-')}
                         </time>
-                        <h2 class="text-2xl font-bold tracking-tight text-slate-800 group-hover:text-blue-600 transition-colors">
-                            <a href={`/blog/${post.slug}/`}>
-                                <span class="absolute -inset-y-6 -inset-x-4 z-20 sm:-inset-x-6 sm:rounded-2xl"></span>
-                                <span class="relative z-10">{post.data.title}</span>
-                            </a>
-                        </h2>
-                        <p class="relative z-10 mt-2 text-slate-600 leading-relaxed">
-                            {post.data.description}
-                        </p>
-                        <div class="relative z-10 mt-4 flex items-center text-sm font-medium text-blue-600 uppercase tracking-wider">
-                            Read Log <span class="ml-1">→</span>
+                        
+                        <div class="flex flex-col">
+                            <h2 class="text-xl font-bold text-[#171717] group-hover:text-[#059669] group-hover:underline decoration-2 underline-offset-8 transition-all leading-snug">
+                                {post.data.title}
+                            </h2>
+                            {post.data.description && (
+                                <p class="mt-2 text-sm text-black/50 font-normal leading-relaxed">
+                                    {post.data.description}
+                                </p>
+                            )}
                         </div>
-                    </article>
-                ))}
-            </div>
-        </main>
-    </div>
+                    </a>
+                </article>
+            ))}
+        </div>
+    </main>
+
+    <footer class="py-20 text-center opacity-20 text-[20px] tracking-[0.5em] uppercase text-black">
+        73 de ba8blk sk
+    </footer>
 </body>
 </html>

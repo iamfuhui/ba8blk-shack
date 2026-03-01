@@ -1,75 +1,77 @@
 ---
 import { getCollection } from 'astro:content';
+import '../../styles/global.css';
 
-// 1. 生成所有文章的路径
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
   return posts.map((post) => ({
     params: { slug: post.slug },
-    props: post,
+    props: { post },
   }));
 }
 
-// 2. 获取当前文章数据
-const post = Astro.props;
+const { post } = Astro.props;
 const { Content } = await post.render();
 ---
 
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{post.data.title} // BA8BLK</title>
-    
-    <style is:global>
-      /* Tailwind v4 核心引入 */
-      @import "tailwindcss";
-      /* 引入排版插件，确保内容美观 */
-      @plugin "@tailwindcss/typography";
-
-      @theme {
-        /* 在这里可以定义你的品牌色 */
-        --color-accent: #2563eb; 
-      }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" />
 </head>
-<body class="bg-white text-slate-900 antialiased font-sans">
-    <nav class="max-w-3xl mx-auto px-6 py-12">
-        <a href="/blog" class="text-sm font-mono text-accent hover:underline flex items-center gap-2">
-            <span class="text-lg">←</span> RETURN_TO_LOG_LIST
-        </a>
-    </nav>
+<body class="bg-[#fbfbfb] text-[#171717] antialiased font-['JetBrains_Mono','Noto_Sans_SC']">
+    
+    <div class="fixed top-0 left-0 w-full h-[2px] bg-black/5 z-50">
+        <div class="h-full bg-[#059669] transition-all duration-150" id="progress-bar" style="width: 0%"></div>
+    </div>
 
-    <main class="max-w-3xl mx-auto px-6 pb-24">
-        <header class="mb-12 border-b border-slate-100 pb-12">
-            <div class="flex items-center gap-3 mb-6">
-                <span class="px-2 py-1 bg-slate-100 text-slate-500 text-xs font-mono rounded">STATION_LOG</span>
-                <time class="text-sm font-mono text-slate-400">
-                    {new Date(post.data.pubDate).toLocaleDateString('zh-CN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                    })}
-                </time>
-            </div>
-            
-            <h1 class="text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
+    <main class="max-w-2xl mx-auto px-6 pt-24 pb-32">
+        <nav class="mb-16">
+            <a href="/blog" class="text-xs font-bold text-black/30 hover:text-black transition-all flex items-center gap-2">
+                &larr; BACK TO ARCHIVE
+            </a>
+        </nav>
+
+        <header class="mb-16">
+            <time class="text-xs font-mono text-[#059669] font-bold tracking-widest block mb-4 uppercase">
+                Release: {post.data.pubDate.toLocaleDateString('zh-CN').replace(/\//g, '.')}
+            </time>
+            <h1 class="text-3xl md:text-4xl font-black text-black leading-tight mb-8 tracking-tighter">
                 {post.data.title}
             </h1>
-
             {post.data.description && (
-                <p class="mt-6 text-xl text-slate-500 leading-relaxed font-serif italic">
+                <p class="text-lg text-black/40 font-light leading-relaxed border-l-2 border-black/5 pl-6">
                     {post.data.description}
                 </p>
             )}
         </header>
 
-        <article class="prose prose-slate prose-lg max-w-none 
-            prose-headings:text-slate-900 prose-headings:font-bold
-            prose-a:text-accent hover:prose-a:text-blue-500
-            prose-code:before:content-none prose-code:after:content-none
-            prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:rounded
-            prose-pre:bg-slate-900 prose-pre:text-slate-200
-            prose-img:rounded-xl prose-img:shadow-md">
+        <article class="prose prose-neutral max-w-none 
+            prose-headings:text-black prose-headings:font-black prose-headings:tracking-tighter
+            prose-p:text-black/80 prose-p:leading-relaxed
+            prose-strong:text-black prose-strong:font-bold
+            prose-code:text-[#059669] prose-code:bg-black/5 prose-code:px-1 prose-code:rounded
+            prose-pre:bg-[#f8f8f8] prose-pre:border prose-pre:border-black/5
+            prose-blockquote:border-[#059669] prose-blockquote:bg-transparent prose-blockquote:text-black/60 prose-blockquote:not-italic">
             <Content />
         </article>
+
+        <footer class="mt-32 pt-10 border-t border-black/5 flex justify-between items-center opacity-20 text-[20px] tracking-[0.2em] uppercase">
+            <span>Operator: BA8BLK</span>
+            <span>Signal out // 73</span>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('scroll', () => {
+            const winScroll = document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            const bar = document.getElementById("progress-bar");
+            if (bar) bar.style.width = scrolled + "%";
+        });
+    </script>
+</body>
+</html>

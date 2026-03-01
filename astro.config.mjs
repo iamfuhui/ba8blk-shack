@@ -1,11 +1,8 @@
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind'; // 确保有这一行
+import tailwindcss from '@tailwindcss/vite'; // 1. 引入 Vite 插件
 
 export default defineConfig({
-  integrations: [
-    tailwind({
-      // 如果你没有 tailwind.config.mjs，可以在这里手动指定配置
-      applyBaseStyles: true,
-    })
-  ],
+  vite: {
+    plugins: [tailwindcss()], // 2. 在这里启用它
+  },
 });

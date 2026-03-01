@@ -1,3 +1,46 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-accent: #22c55e;        /* 浅色模式下，绿色调深一点更清晰 */
+  --color-bg-light: #fbfbfb;     /* 接近纸张的浅奶白色 */
+  --color-text-main: #171717;    /* 近乎黑色的深灰 */
+  --color-text-muted: #666666;   /* 次要灰 */
+  
+  --font-mono: "JetBrains Mono", "Noto Sans SC", monospace;
+}
+
+:root {
+  background-color: var(--color-bg-light);
+  color: var(--color-text-main);
+  font-family: var(--font-mono);
+  font-style: normal !important;
+}
+
+/* 彻底禁用中文斜体 */
+em, i {
+  font-style: normal !important;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* 浅色模式下的 Prose (正文排版) */
+.prose {
+  --tw-prose-body: #374151;
+  --tw-prose-headings: #111827;
+  --tw-prose-links: #059669;
+  --tw-prose-bold: #111827;
+  --tw-prose-quotes: #4b5563;
+  --tw-prose-quote-borders: #e5e7eb;
+  --tw-prose-code: #111827;
+  --tw-prose-pre-bg: #f3f4f6;
+  --tw-prose-pre-code: #1f2937;
+  
+  max-width: 65ch;
+  line-height: 1.8;
+}
+
+/* 移除扫描线动画，浅色模式不需要 CRT 效果，保持纯净 */
+.crt-effect {
+  display: none;
+}
