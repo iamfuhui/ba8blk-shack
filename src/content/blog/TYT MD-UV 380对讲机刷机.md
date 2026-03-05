@@ -23,7 +23,7 @@ tags:
 淘宝上的K头写频线鱼龙混杂，我买了3根都无法正确连接对讲机。
 其余需要注意的：
 	
-1. 固件文件必须使用 OpenGD77 CPS 中的 “Extras/Firmware Loader”（“附加/固件加载程序”）菜单安装。原厂提供的固件更新工具不能用于刷入 OpenGD77 固件。### [OpenGD77 CPS 2025 03 23](https://www.opengd77.com/archive/viewtopicf032.html?f=12&t=4991&#p36368) 最新版。
+1. 固件文件必须使用 OpenGD77 CPS 中的 “Extras/Firmware Loader”（“附加/固件加载程序”）菜单安装。原厂提供的固件更新工具不能用于刷入 OpenGD77 固件。  [OpenGD77 CPS 2025 03 23](https://www.opengd77.com/archive/viewtopicf032.html?f=12&t=4991&#p36368) 最新版。
 	
 2. 官方提供的固件版本，不包括中文字库与系统。https://www.opengd77.com/downloads/releases/MDUV380_DM1701/R20260131/firmware/
 	
