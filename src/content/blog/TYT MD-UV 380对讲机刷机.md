@@ -1,7 +1,7 @@
 ---
-title: 在这里输入标题
+title: TYT MD-UV 380对讲机刷机
 pubDate: 2026-03-05
-description: 简短的文章描述
+description: OpenGD77
 tags:
   - Radio
   - Tech
