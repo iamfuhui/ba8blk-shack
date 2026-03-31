@@ -34,15 +34,53 @@ const signalStrength = Math.floor(Math.random() * 4) + 6; // 模拟 S6-S9 的信
 
         <section class="mb-24">
             <h1 class="text-4xl font-[900] text-black tracking-tighter mb-8 uppercase">关于我 / About</h1>
-            <article class="prose prose-neutral max-w-none 
-                prose-p:text-black/80 prose-p:leading-relaxed 
-                prose-blockquote:border-[#059669] prose-blockquote:bg-transparent prose-blockquote:not-italic">
-                <p>这里是 <strong>BA8BLK</strong>，一名位于中国第8区的业余无线电爱好者。</p>
-                <p>本站是我个人的数字通联日志，记录关于无线电技术、代码开发以及生活中的零散信号。我坚信在这个高度连接的时代，依然有些信号值得跨越山海去捕捉。</p>
-                <blockquote>
-                    73 是我们最诚挚的敬意，是对远方友谊的最终确认。
-                </blockquote>
-            </article>
+            <div class="mb-12">
+  <h1 class="text-4xl font-bold tracking-tighter uppercase mb-4 flex items-center gap-4">
+    <span>关于我</span>
+    <span class="text-gray-200 font-light text-3xl">/</span>
+    <span class="text-2xl text-gray-400 font-['JetBrains_Mono'] mt-1">ABOUT</span>
+  </h1>
+</div>
+
+<article class="space-y-10 text-gray-800 leading-relaxed">
+  
+  <section>
+    <p class="text-lg mb-2">
+      这里是 <span class="font-bold">BA8BLK</span>，一名位于中国第 8 区的业余无线电爱好者。
+    </p>
+    <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
+      This is <span class="font-bold">BA8BLK</span>, an amateur radio enthusiast located in Zone 8, China.
+    </p>
+  </section>
+
+  <section>
+    <p class="text-lg mb-2">
+      本站是我个人的数字通联日志，记录关于无线电技术、代码开发以及生活中的零散信号。
+    </p>
+    <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
+      This site serves as my personal digital logbook, capturing fragments of radio technology, code development, and the scattered signals of daily life.
+    </p>
+  </section>
+
+  <section>
+    <p class="text-lg mb-2">
+      我坚信在这个高度连接的时代，依然有些信号值得跨越山海去捕捉。
+    </p>
+    <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
+      I firmly believe that in this hyper-connected era, there are still signals worth chasing across mountains and seas.
+    </p>
+  </section>
+
+  <div class="border-l-4 border-[#38A169] pl-6 py-2 mt-12 bg-gray-50">
+    <p class="text-gray-700 italic mb-1">
+      73 是我们最诚挚的敬意，是对远方友谊的最终确认。
+    </p>
+    <p class="text-xs text-gray-400 font-['JetBrains_Mono']">
+      73 is our sincerest regard, the ultimate confirmation of friendship from afar.
+    </p>
+  </div>
+
+</article>
         </section>
 
         <section class="border border-black/10 bg-black/[0.02] p-8 rounded-sm relative overflow-hidden">
