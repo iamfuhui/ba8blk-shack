@@ -1,0 +1,6 @@
+[
+  { "call": "W1AW", "date": "2026-03-28", "time": "14:30", "band": "10m", "mode": "FT8", "qsl": "CONFIRMED" },
+  { "call": "JA1ABC", "date": "2026-03-27", "time": "09:15", "band": "15m", "mode": "CW", "qsl": "PENDING" },
+  { "call": "", "date": "2026-03-20", "time": "11:00", "band": "20m", "mode": "SSB", "qsl": "CONFIRMED" },
+  { "call": "W1AW-7", "date": "2026-01-15", "time": "08:20", "band": "40m", "mode": "FT8", "qsl": "PENDING" }
+]

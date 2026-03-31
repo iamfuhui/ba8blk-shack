@@ -1,0 +1,196 @@
+---
+import '../styles/global.css'; 
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QSL CHECK // BA8BLK</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-[#F8F9FA] min-h-screen m-0 font-sans text-gray-900 selection:bg-[#38A169] selection:text-white">
+
+  <div class="max-w-3xl mx-auto py-12 px-4">
+    
+    <div class="mb-10 mt-8 md:mt-12">
+      <h1 class="text-3xl font-bold tracking-widest uppercase mb-2 flex items-center gap-3">
+        <span>QSL 查询</span>
+        <span class="text-gray-300 font-light">/</span> 
+        <span class="text-xl text-gray-500 font-['JetBrains_Mono'] mt-1">QSL CHECK</span>
+      </h1>
+      <p class="text-sm text-gray-500 leading-relaxed">
+        输入您的呼号，查询与 BA8BLK 的通联记录及 QSL 卡片确认状态。<br/>
+        <span class="text-xs text-gray-400 font-['JetBrains_Mono'] mt-1 block">Enter your callsign to check QSO records and QSL card status with BA8BLK.</span>
+      </p>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-sm p-6 md:p-8 shadow-sm font-['JetBrains_Mono']">
+      
+      <div class="flex justify-between items-center text-xs text-[#38A169] mb-8 uppercase tracking-wider">
+        <div class="flex items-center gap-2">
+          <span class="animate-pulse">●</span>
+          <span id="system-status">System_Ready <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 系统就绪</span></span>
+        </div>
+      </div>
+
+      <div class="mb-10 relative">
+        <div class="flex items-end gap-4 border-b-2 border-gray-300 focus-within:border-[#38A169] transition-colors pb-2">
+          <span class="text-gray-400 text-lg sm:text-2xl select-none">></span>
+          <input 
+            type="text" 
+            id="query-input"
+            placeholder="ENTER CALLSIGN // 输入呼号" 
+            class="w-full bg-transparent text-2xl sm:text-3xl font-bold text-gray-800 uppercase outline-none placeholder-gray-300 placeholder:text-xl placeholder:font-normal"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button 
+            id="search-btn"
+            class="hidden sm:flex items-center whitespace-nowrap shrink-0 bg-[#38A169] text-white text-xs px-5 py-2 rounded-sm hover:bg-green-700 transition-colors uppercase tracking-widest cursor-pointer"
+          >
+            QUERY <span class="opacity-70 ml-1 text-[10px] tracking-normal font-sans">// 查询</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="results-container" class="space-y-4">
+        <div class="text-sm text-gray-400 italic">
+          Awaiting_Input... <span class="opacity-60 ml-1 font-sans tracking-normal not-italic">// 等待指令...</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    console.log("[系统启动] 1. QSL 查询脚本开始加载...");
+
+    let logbookData = [];
+    
+    const inputEl = document.getElementById('query-input');
+    const btnEl = document.getElementById('search-btn');
+    const resultsEl = document.getElementById('results-container');
+    const statusEl = document.getElementById('system-status');
+
+    if (!inputEl || !btnEl || !resultsEl || !statusEl) {
+      console.error("[致命错误] 页面上找不到对应的 HTML 元素！请检查 ID 是否对应。");
+    } else {
+      console.log("[系统状态] 2. 页面元素绑定成功！准备拉取数据...");
+    }
+
+    // 下载数据的函数
+    async function fetchLogbook() {
+      try {
+        console.log("[网络请求] 3. 开始向 /data/logbook.json 发起请求...");
+        statusEl.innerHTML = `Downloading_Database... <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 下载数据中</span>`;
+        
+        const response = await fetch(`/data/logbook.json?t=${new Date().getTime()}`); 
+        
+        if (!response.ok) {
+          throw new Error(`HTTP 错误! 状态码: ${response.status}`);
+        }
+
+        logbookData = await response.json();
+        console.log(`[数据加载] 4. 成功拉取数据！当前共有 ${logbookData.length} 条记录。`, logbookData);
+        
+        statusEl.innerHTML = `Database_Loaded // ${logbookData.length}_Records <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 数据就绪</span>`;
+      } catch (error) {
+        console.error("[网络错误] 无法读取 JSON 文件:", error);
+        statusEl.innerHTML = `Error_Database_Offline <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 数据离线</span>`;
+        statusEl.classList.replace('text-[#38A169]', 'text-red-500');
+      }
+    }
+
+    // 搜索执行函数
+    function performSearch() {
+      const rawQuery = inputEl.value.trim().toUpperCase();
+      console.log(`[搜索触发] 5. 用户输入了关键词: "${rawQuery}"`);
+
+      if (!rawQuery) {
+        resultsEl.innerHTML = '<div class="text-sm text-gray-400 italic">Awaiting_Input... <span class="opacity-60 ml-1 font-sans tracking-normal not-italic">// 等待指令...</span></div>';
+        return;
+      }
+
+      statusEl.innerHTML = `Searching_Index // ${rawQuery} <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 检索中</span>`;
+
+      // 过滤数据
+      const hits = logbookData.filter(qso => {
+        const targetCall = (qso.call || qso.callsign || "").toUpperCase();
+        return targetCall.includes(rawQuery);
+      });
+
+      console.log(`[搜索结果] 6. 找到了 ${hits.length} 条匹配记录。`, hits);
+
+      if (hits.length === 0) {
+        resultsEl.innerHTML = `
+          <div class="text-red-500 text-sm mt-4">
+            [!] NO_RECORDS_FOUND: "${rawQuery}" <span class="opacity-60 ml-1 font-sans tracking-normal">// 未找到相关通联记录</span>
+          </div>
+        `;
+      } else {
+        let htmlString = `<div class="text-xs text-gray-500 mb-4">MATCH_FOUND: ${hits.length} RECORD(S) <span class="opacity-60 ml-1 font-sans tracking-normal">// 匹配结果</span></div>`;
+        
+        hits.forEach(qso => {
+          const displayCall = qso.call || qso.callsign || "UNKNOWN";
+          const displayDate = qso.date || (qso.time_on ? qso.time_on.split(' ')[0] : "N/A");
+          const displayTime = qso.time || (qso.time_on ? qso.time_on.split(' ')[1] : "");
+          const statusColor = qso.qsl === 'CONFIRMED' ? 'text-[#38A169] border-[#38A169]' : 'text-yellow-600 border-yellow-600';
+          const displayQsl = qso.qsl || "PENDING";
+          
+          htmlString += `
+            <div class="border border-gray-200 bg-[#F8F9FA] p-4 rounded-sm hover:border-gray-400 transition-colors">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4 text-sm w-full">
+                 <div>
+                   <div class="text-gray-400 text-xs flex items-center gap-1 mb-1 tracking-wide">
+                     CALLSIGN <span class="opacity-50 text-[10px] mt-[1px] font-sans tracking-normal">// 呼号</span>
+                   </div>
+                   <div class="font-bold text-lg font-sans text-gray-900">${displayCall}</div>
+                 </div>
+                 <div>
+                   <div class="text-gray-400 text-xs flex items-center gap-1 mb-1 tracking-wide">
+                     TIMESTAMP <span class="opacity-50 text-[10px] mt-[1px] font-sans tracking-normal">// 时间</span>
+                   </div>
+                   <div class="text-gray-700">${displayDate} ${displayTime}</div>
+                 </div>
+                 <div>
+                   <div class="text-gray-400 text-xs flex items-center gap-1 mb-1 tracking-wide">
+                     TERMINAL <span class="opacity-50 text-[10px] mt-[1px] font-sans tracking-normal">// 终端</span>
+                   </div>
+                   <div class="text-gray-700">${qso.band || 'N/A'} // ${qso.mode || 'N/A'}</div>
+                 </div>
+                 <div class="md:text-right flex flex-col md:items-end">
+                    <div class="text-gray-400 text-xs flex items-center md:justify-end gap-1 mb-1 tracking-wide">
+                      STATUS <span class="opacity-50 text-[10px] mt-[1px] font-sans tracking-normal">// 状态</span>
+                    </div>
+                    <div class="font-bold px-2 py-1 border ${statusColor} text-xs rounded-sm inline-block">${displayQsl}</div>
+                 </div>
+              </div>
+            </div>
+          `;
+        });
+        resultsEl.innerHTML = htmlString;
+      }
+      
+      setTimeout(() => {
+        statusEl.innerHTML = `System_Ready // Enter_Callsign <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 等待输入</span>`;
+      }, 1000);
+    }
+
+    if (btnEl && inputEl) {
+      btnEl.addEventListener('click', performSearch);
+      inputEl.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') performSearch();
+      });
+      inputEl.addEventListener('input', () => {
+          if(inputEl.value.length > 2) performSearch(); 
+          if(inputEl.value.length === 0) performSearch(); 
+      });
+    }
+
+    fetchLogbook();
+  </script>
+</body>
+</html>
