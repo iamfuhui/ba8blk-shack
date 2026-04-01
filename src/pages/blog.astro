@@ -1,14 +1,17 @@
 ---
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
+import SEO from '../components/SEO.astro'; // 记得引入
 const posts = await getCollection('blog');
-const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+// ... 排序逻辑
 ---
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LOGS // BA8BLK</title>
+    <SEO 
+      title="LOGS // 文章归档" 
+      description="BA8BLK 的电波随笔与技术笔记。涵盖业余无线电设备折腾、数字模式研究及无线电技术分享。"
+      keywords="BA8BLK 博客, 业余无线电教程, 无线电技术笔记, HAM Radio Blog, 软件无线电, MMDVM"
+    />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" />
 </head>
 <body class="bg-[#fbfbfb] text-[#171717] antialiased font-['JetBrains_Mono','Noto_Sans_SC']">

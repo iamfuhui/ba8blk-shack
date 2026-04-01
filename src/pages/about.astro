@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import SEO from '../components/SEO.astro'; 
 
 // 1. 获取访客实时数据 (Cloudflare 提供)
 // 在本地开发环境，这些值可能为 null，所以我们提供回退字符串
@@ -18,9 +19,11 @@ const signalStrength = Math.floor(Math.random() * 4) + 6; // 模拟 S6-S9 的信
 
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ABOUT // BA8BLK</title>
+    <SEO 
+      title="ABOUT // 运营商信息" 
+      description="了解 BA8BLK 电台及其操作员 Hui。这里记录了台站坐标四川德阳 (OM21EC)、所用设备以及对业余无线电的热爱。"
+      keywords="BA8BLK是谁, 四川德阳HAM, 业余无线电操作员, OM21EC, 无线电台站介绍"
+    />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" />
 </head>
 <body class="bg-[#fbfbfb] text-[#171717] antialiased font-['JetBrains_Mono','Noto_Sans_SC']">
