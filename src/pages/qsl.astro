@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css'; 
-import rawQsoData from '../data/qso.json'; // 魔法第一步：在服务器端直接读取你的 JSON！
+import rawQsoData from '../data/qso.json'; 
 import SEO from '../components/SEO.astro';
 ---
 
@@ -62,9 +62,8 @@ import SEO from '../components/SEO.astro';
           />
           <button 
             id="search-btn"
-            class="hidden sm:flex items-center whitespace-nowrap shrink-0 bg-[#38A169] text-white text-xs px-5 py-2 rounded-sm hover:bg-green-700 transition-colors uppercase tracking-widest cursor-pointer"
-          >
-            QUERY <span class="opacity-70 ml-1 text-[10px] tracking-normal font-sans">// 查询</span>
+            class="flex items-center whitespace-nowrap shrink-0 bg-[#38A169] text-white text-xs px-4 py-2 sm:px-5 rounded-sm hover:bg-green-700 transition-colors uppercase tracking-widest cursor-pointer">
+            QUERY <span class="hidden xs:inline opacity-70 ml-1 text-[10px] tracking-normal font-sans">// 查询</span>
           </button>
         </div>
       </div>
