@@ -11,10 +11,14 @@ const {
     title, 
     description = "BA8BLK 业余无线电台控制中心。提供实时通联日志 (QSO)、卡片确认状态查询 (QSL) 以及电波信号博客。", 
     keywords = "BA8BLK, 业余无线电, HAM Radio, QSO, QSL, FT8, 四川德阳, OM21EC, Wavelog",
-    image = "https://ba8blk.com/og-image.jpg"
+    // 修正：改为你 public 文件夹下真实的 png 文件名
+    image = "/og-image.png" 
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://ba8blk.com');
+// 确保生成绝对路径，这是社交平台抓取的硬性要求 
+const siteURL = Astro.site || 'https://ba8blk.com';
+const canonicalURL = new URL(Astro.url.pathname, siteURL);
+const imageURL = image.startsWith('http') ? image : new URL(image, siteURL).href;
 ---
 
 <meta charset="utf-8" />
@@ -28,12 +32,12 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://ba8blk.c
 <meta property="og:url" content={canonicalURL} />
 <meta property="og:title" content={`${title} // BA8BLK`} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={image} /> 
+<meta property="og:image" content={imageURL} /> 
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={`${title} // BA8BLK`} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={image} />
+<meta name="twitter:image" content={imageURL} />
 
 <meta name="robots" content="index, follow" />
 <link rel="canonical" href={canonicalURL} />
