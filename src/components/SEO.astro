@@ -1,0 +1,41 @@
+---
+// src/components/SEO.astro
+export interface Props {
+    title: string;
+    description?: string;
+    keywords?: string;
+    image?: string;
+}
+
+const { 
+    title, 
+    description = "BA8BLK 业余无线电台控制中心。提供实时通联日志 (QSO)、卡片确认状态查询 (QSL) 以及电波信号博客。", 
+    keywords = "BA8BLK, 业余无线电, HAM Radio, QSO, QSL, FT8, 四川德阳, OM21EC, Wavelog",
+    image = "https://ba8blk.com/og-image.jpg"
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://ba8blk.com');
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{title} // BA8BLK</title>
+<meta name="description" content={description} />
+<meta name="keywords" content={keywords} />
+<meta name="author" content="BA8BLK" />
+
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={`${title} // BA8BLK`} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={image} /> 
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={`${title} // BA8BLK`} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href={canonicalURL} />
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;800&display=swap" rel="stylesheet">
