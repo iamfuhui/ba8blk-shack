@@ -1,7 +1,12 @@
 ---
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
-import SEO from '../components/SEO.astro'; // 记得引入
+import SEO from '../components/SEO.astro';
+
+// 👇 补上这关键的一行：从内容集合中获取所有的博客文章
+const allPosts = await getCollection('blog');
+
+// 记得引入 (现在的 allPosts 有数据了，排序就不会报错了)
 const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 <html lang="zh-CN">
