@@ -14,7 +14,8 @@ interface QsoRecord {
   grid: string;
 }
 
-const qsoData = (rawQsoData as QsoRecord[]).reverse(); // 建议反转，让最新的通联排在最前
+// 无需反转，SQL 导出本身已是最新在前
+const qsoData = rawQsoData as QsoRecord[];
 const totalHits = qsoData.length;
 const uniqueCallsigns = totalHits > 0 
   ? [...new Set(qsoData.map(q => q.callsign))].length 
@@ -32,109 +33,91 @@ const uniqueCallsigns = totalHits > 0
 </head>
 <body class="bg-[#F8F9FA] min-h-screen m-0 font-sans text-gray-900 selection:bg-[#38A169] selection:text-white">
 
-  <div class="max-w-3xl mx-auto px-4 relative">
+  <div class="max-w-4xl mx-auto px-4 relative">
     <div class="absolute top-8 left-4 md:left-0">
-      <a 
-        href="/" 
-        class="text-[11px] font-mono text-gray-400 hover:text-[#38A169] transition-colors flex items-center gap-2 group uppercase tracking-widest"
-      >
+      <a href="/" class="text-[11px] font-mono text-gray-400 hover:text-[#38A169] transition-colors flex items-center gap-2 group uppercase tracking-widest">
         <span class="group-hover:-translate-x-1 transition-transform inline-block">←</span>
         <span>Return_to_Console 返回工作台</span>
       </a>
     </div>
   </div>
 
-  <div class="max-w-3xl mx-auto pt-24 pb-12 px-4">
+  <div class="max-w-4xl mx-auto pt-24 pb-12 px-4">
     
-    <div class="mb-10">
-      <h1 class="text-2xl md:text-3xl font-bold tracking-widest uppercase mb-2 flex items-center gap-3">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold tracking-widest uppercase mb-1 flex items-center gap-3">
         <span>通联日志</span>
         <span class="text-gray-300 font-light">/</span> 
-        <span class="text-xl text-gray-500 font-mono mt-1">QSO LOG</span>
+        <span class="text-lg text-gray-500 font-mono mt-1">QSO LOG</span>
       </h1>
       <p class="text-sm text-gray-500 leading-relaxed">
-        以下是由电台室自动同步的近期通联记录。展示最近 <strong class="text-gray-800">{totalHits}</strong> 次有效信号解码。<br/>
-        <span class="text-xs text-gray-400 font-mono mt-1 block">Records automatically synced from the shack.</span>
+        由电台室自动同步的近期通联记录。最近 <strong class="text-gray-800">{totalHits}</strong> 次有效解码。
       </p>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-sm p-6 md:p-8 shadow-sm">
-      
-      <div class="flex justify-between items-center text-xs font-mono text-[#38A169] mb-8 uppercase tracking-wider">
-        <div class="flex items-center gap-2">
-          <span class={totalHits > 0 ? "animate-pulse" : "opacity-50"}>●</span>
-          <span>Terminal_Monitor <span class="opacity-60 ml-1 text-[10px] font-sans">// 终端监视器</span></span>
+    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6 flex justify-between items-center">
+      <div>
+        <div class="text-[10px] md:text-xs font-mono text-gray-400 mb-1 uppercase tracking-wide">
+          Cumulative_Hits // 累计解码
         </div>
-        <span class="hidden xs:block opacity-70">
-          {totalHits > 0 ? "Scanning_Active..." : "Standby_Mode"}
-        </span>
+        <div class="text-3xl font-black text-gray-800">{totalHits}</div>
       </div>
-
-      <div class="grid grid-cols-2 gap-4 md:gap-8 mb-8 border-b border-gray-200 pb-8">
-        <div>
-          <div class="text-[10px] md:text-xs font-mono text-gray-400 mb-2 uppercase tracking-wide">
-            Cumulative_Hits <span class="opacity-50">// 累计解码</span>
-          </div>
-          <div class="text-2xl md:text-4xl font-bold">{totalHits}</div>
+      <div class="text-right">
+        <div class="text-[10px] md:text-xs font-mono text-gray-400 mb-1 uppercase tracking-wide">
+          Unique_Callsigns // 独立呼号
         </div>
-        <div>
-          <div class="text-[10px] md:text-xs font-mono text-gray-400 mb-2 uppercase tracking-wide">
-            Unique_Callsigns <span class="opacity-50">// 独立呼号</span>
-          </div>
-          <div class="text-2xl md:text-4xl font-bold">{uniqueCallsigns}</div>
-        </div>
+        <div class="text-3xl font-black text-gray-800">{uniqueCallsigns}</div>
       </div>
-
-      <div class="space-y-4">
-        {totalHits === 0 ? (
-          <div class="text-center py-12 border border-dashed border-gray-300 rounded-sm bg-gray-50">
-            <div class="text-gray-400 font-mono text-sm">NO_SIGNAL_DETECTED</div>
-          </div>
-        ) : (
-          qsoData.map((qso, index) => (
-            <div class="bg-[#F8F9FA] rounded-sm p-4 border border-gray-100 hover:border-[#38A169] transition-colors group">
-              <div class="text-[10px] font-mono text-[#38A169] mb-4 tracking-wide">
-                {index === 0 ? "LAST_INCOMING_PACKET_DECODED" : "PREVIOUS_PACKET_DECODED"}
-              </div>
-              
-              <div class="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-y-3 sm:gap-y-2 text-sm font-mono text-gray-700">
-                
-                <div class="flex justify-between sm:block pr-4">
-                  <span class="text-gray-400 uppercase">Callsign</span>
-                  <span class="font-bold text-gray-900 sm:hidden">{qso.callsign}</span>
-                </div>
-                <div class="hidden sm:block font-bold text-gray-900 text-base">{qso.callsign}</div>
-                
-                <div class="flex justify-between sm:block pr-4">
-                  <span class="text-gray-400 uppercase">Origin</span>
-                  <span class="text-gray-700 sm:hidden uppercase text-right">{qso.country}</span>
-                </div>
-                <div class="hidden sm:block uppercase tracking-wide">{qso.country} <span class="text-gray-400 ml-1">[{qso.grid || 'N/A'}]</span></div>
-                
-                <div class="flex justify-between sm:block pr-4">
-                  <span class="text-gray-400 uppercase">Timestamp</span>
-                  <span class="text-gray-600 sm:hidden text-xs">{qso.time_on}</span>
-                </div>
-                <div class="hidden sm:block">{qso.time_on} UTC</div>
-                
-                <div class="flex justify-between sm:block pr-4">
-                  <span class="text-gray-400 uppercase">Terminal</span>
-                  <span class="text-gray-600 sm:hidden">{qso.band} / {qso.mode}</span>
-                </div>
-                <div class="hidden sm:block">{qso.band} // {qso.mode}</div>
-                
-                <div class="flex justify-between sm:block pr-4 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t border-gray-200 sm:border-none">
-                  <span class="text-gray-400 uppercase">Report</span>
-                  <span class="text-[#38A169] font-bold sm:hidden">TX:{qso.rst_sent} RX:{qso.rst_rcvd}</span>
-                </div>
-                <div class="hidden sm:block text-[#38A169] font-bold">TX: {qso.rst_sent} // RX: {qso.rst_rcvd}</div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
     </div>
+
+    <div class="flex justify-between items-center text-[10px] font-mono text-[#38A169] mb-4 px-2 uppercase tracking-wider">
+      <div class="flex items-center gap-2">
+        <span class={totalHits > 0 ? "animate-pulse" : "opacity-50"}>●</span>
+        <span>Terminal_Monitor_Active</span>
+      </div>
+      <span class="opacity-60 text-gray-400">
+        {totalHits > 0 ? "Sorted_By: Newest_First" : "Standby"}
+      </span>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      {totalHits === 0 ? (
+        <div class="text-center py-12 bg-gray-50">
+          <div class="text-gray-400 font-mono text-sm">NO_SIGNAL_DETECTED</div>
+        </div>
+      ) : (
+        <div class="overflow-x-auto">
+          <table class="w-full text-left font-mono text-xs md:text-sm whitespace-nowrap">
+            <thead class="bg-gray-50 text-gray-400 border-b border-gray-200 uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="px-4 py-3 font-normal">UTC Time</th>
+                <th class="px-4 py-3 font-normal">Callsign</th>
+                <th class="px-4 py-3 font-normal">Freq / Mode</th>
+                <th class="px-4 py-3 font-normal">Report (TX/RX)</th>
+                <th class="px-4 py-3 font-normal">Location [Grid]</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-gray-600">
+              {qsoData.map((qso) => (
+                <tr class="hover:bg-gray-50 transition-colors group">
+                  <td class="px-4 py-2 text-gray-400">{qso.time_on}</td>
+                  <td class="px-4 py-2 font-bold text-gray-800 group-hover:text-[#38A169] transition-colors">{qso.callsign}</td>
+                  <td class="px-4 py-2">{qso.band} <span class="text-gray-400 ml-1">{qso.mode}</span></td>
+                  <td class="px-4 py-2 font-medium text-[#38A169]">
+                    <span class="text-gray-400 text-[10px] font-normal">TX:</span> {qso.rst_sent} 
+                    <span class="text-gray-400 text-[10px] font-normal ml-2">RX:</span> {qso.rst_rcvd}
+                  </td>
+                  <td class="px-4 py-2 text-gray-500">
+                    {qso.country} <span class="text-gray-400 text-[10px] ml-1">[{qso.grid || '---'}]</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+
   </div>
 </body>
 </html>
