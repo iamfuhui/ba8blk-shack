@@ -88,47 +88,47 @@ const uniqueCallsigns = totalHits > 0
       ) : (
         <div class="overflow-x-auto">
           <table class="w-full text-left font-mono text-xs md:text-sm whitespace-nowrap">
-            <thead class="bg-gray-50 text-gray-500 border-b border-gray-200 tracking-wider">
-              <tr>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">UTC Time</div>
-                  <div class="text-[9px] text-gray-400 mt-0.5 font-sans tracking-normal">交联时间</div>
-                </th>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">Callsign</div>
-                  <div class="text-[9px] text-gray-400 mt-0.5 font-sans tracking-normal">电台呼号</div>
-                </th>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">Band / Mode</div>
-                  <div class="text-[9px] text-gray-400 mt-0.5 font-sans tracking-normal">频段 / 模式</div>
-                </th>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">Report (TX/RX)</div>
-                  <div class="text-[9px] text-gray-400 mt-0.5 font-sans tracking-normal">信号报告 (发/收)</div>
-                </th>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">Location [Grid]</div>
-                  <div class="text-[9px] text-gray-400 mt-0.5 font-sans tracking-normal">位置 [网格]</div>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 text-gray-600">
-              {qsoData.map((qso) => (
-                <tr class="hover:bg-gray-50 transition-colors group">
-                  <td class="px-4 py-2 text-gray-400">{qso.time_on}</td>
-                  <td class="px-4 py-2 font-bold text-gray-800 group-hover:text-[#38A169] transition-colors">{qso.callsign}</td>
-                  <td class="px-4 py-2">{qso.band} <span class="text-gray-400 ml-1">{qso.mode}</span></td>
-                  <td class="px-4 py-2 font-medium text-[#38A169]">
-                    <span class="text-gray-400 text-[10px] font-normal">TX:</span> {qso.rst_sent} 
-                    <span class="text-gray-400 text-[10px] font-normal ml-2">RX:</span> {qso.rst_rcvd}
-                  </td>
-                  <td class="px-4 py-2 text-gray-500">
-                    {qso.country} <span class="text-gray-400 text-[10px] ml-1">[{qso.grid || '---'}]</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  <thead class="bg-gray-50 text-gray-600 border-b border-gray-200 tracking-wider">
+    <tr>
+      <th class="px-4 py-4 font-normal align-top">
+        <div class="text-[10px] uppercase font-bold text-gray-500">UTC Time</div>
+        <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal font-medium">通联时间</div>
+      </th>
+      <th class="px-4 py-4 font-normal align-top">
+        <div class="text-[10px] uppercase font-bold text-gray-500">Callsign</div>
+        <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal font-medium">电台呼号</div>
+      </th>
+      <th class="px-4 py-4 font-normal align-top">
+        <div class="text-[10px] uppercase font-bold text-gray-500">Band / Mode</div>
+        <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal font-medium">频段 / 模式</div>
+      </th>
+      <th class="px-4 py-4 font-normal align-top">
+        <div class="text-[10px] uppercase font-bold text-gray-500">Report (TX/RX)</div>
+        <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal font-medium">信号报告 (发/收)</div>
+      </th>
+      <th class="px-4 py-4 font-normal align-top">
+        <div class="text-[10px] uppercase font-bold text-gray-500">Location [Grid]</div>
+        <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal font-medium">位置 [网格]</div>
+      </th>
+    </tr>
+  </thead>
+  <tbody class="divide-y divide-gray-100 text-gray-600">
+    {qsoData.map((qso) => (
+      <tr class="hover:bg-gray-50 transition-colors group">
+        <td class="px-4 py-2.5 text-gray-400">{qso.time_on}</td>
+        <td class="px-4 py-2.5 font-bold text-gray-800 group-hover:text-[#38A169] transition-colors">{qso.callsign}</td>
+        <td class="px-4 py-2.5">{qso.band} <span class="text-gray-400 ml-1">{qso.mode}</span></td>
+        <td class="px-4 py-2.5 font-medium text-[#38A169]">
+          <span class="text-gray-400 text-[10px] font-normal">TX:</span> {qso.rst_sent} 
+          <span class="text-gray-400 text-[10px] font-normal ml-2">RX:</span> {qso.rst_rcvd}
+        </td>
+        <td class="px-4 py-2.5 text-gray-500">
+          {qso.country} <span class="text-gray-400 text-[10px] ml-1">[{qso.grid || '---'}]</span>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
         </div>
       )}
     </div>
