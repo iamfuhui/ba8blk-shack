@@ -2,8 +2,7 @@
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import SEO from '../components/SEO.astro'; // 记得引入
-const posts = await getCollection('blog');
-// ... 排序逻辑
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 <html lang="zh-CN">
 <head>
