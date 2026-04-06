@@ -14,8 +14,11 @@ interface QsoRecord {
   grid: string;
 }
 
-// 无需反转，SQL 导出本身已是最新在前
-const qsoData = rawQsoData as QsoRecord[];
+// 【关键修改】：显式执行一次排序，确保 time_on 晚的（最新的）排在数组最前面
+const qsoData = (rawQsoData as QsoRecord[]).sort((a, b) => {
+  return new Date(b.time_on).getTime() - new Date(a.time_on).getTime();
+});
+
 const totalHits = qsoData.length;
 const uniqueCallsigns = totalHits > 0 
   ? [...new Set(qsoData.map(q => q.callsign))].length 
