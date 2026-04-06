@@ -14,15 +14,28 @@ interface QsoRecord {
   grid: string;
 }
 
-// 【关键修改】：显式执行一次排序，确保 time_on 晚的（最新的）排在数组最前面
-const qsoData = (rawQsoData as QsoRecord[]).sort((a, b) => {
+// 1. 排序逻辑
+const allSortedData = (rawQsoData as QsoRecord[]).sort((a, b) => {
   return new Date(b.time_on).getTime() - new Date(a.time_on).getTime();
 });
 
-const totalHits = qsoData.length;
+// 2. 分页参数
+const pageSize = 25;
+const totalHits = allSortedData.length;
+const { searchParams } = Astro.url;
+const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1'));
+const totalPages = Math.ceil(totalHits / pageSize);
+
+// 3. 截取当前页数据
+const qsoData = allSortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+// 4. 统计
 const uniqueCallsigns = totalHits > 0 
-  ? [...new Set(qsoData.map(q => q.callsign))].length 
+  ? [...new Set(allSortedData.map(q => q.callsign))].length 
   : 0;
+
+// 预处理分页字符串，避免在模板里写复杂的逻辑
+const pageStatus = totalHits > 0 ? "PAGE: " + currentPage + " / " + totalPages : "Standby";
 ---
 
 <!DOCTYPE html>
@@ -79,7 +92,7 @@ const uniqueCallsigns = totalHits > 0
         <span>Terminal_Monitor_Active</span>
       </div>
       <span class="opacity-60 text-gray-400">
-        {totalHits > 0 ? "Sorted_By: Newest_First" : "Standby"}
+        {pageStatus}
       </span>
     </div>
 
@@ -89,50 +102,77 @@ const uniqueCallsigns = totalHits > 0
           <div class="text-gray-400 font-mono text-sm">NO_SIGNAL_DETECTED</div>
         </div>
       ) : (
-        <div class="overflow-x-auto">
-          <table class="w-full text-left font-mono text-xs md:text-sm whitespace-nowrap">
-            <thead class="bg-gray-50 text-gray-500 border-b border-gray-200 tracking-wider">
-              <tr>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">UTC Time</div>
-                  <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">通联时间</div>
-                </th>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">Callsign</div>
-                  <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">电台呼号</div>
-                </th>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">Band / Mode</div>
-                  <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">频段 / 模式</div>
-                </th>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">Report (TX/RX)</div>
-                  <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">信号报告 (发/收)</div>
-                </th>
-                <th class="px-4 py-3 font-normal align-top">
-                  <div class="text-[10px] uppercase">Location [Grid]</div>
-                  <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">位置 [网格]</div>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 text-gray-600">
-              {qsoData.map((qso) => (
-                <tr class="hover:bg-gray-50 transition-colors group">
-                  <td class="px-4 py-2.5 text-gray-400">{qso.time_on}</td>
-                  <td class="px-4 py-2.5 font-bold text-gray-800 group-hover:text-[#38A169] transition-colors">{qso.callsign}</td>
-                  <td class="px-4 py-2.5">{qso.band} <span class="text-gray-400 ml-1">{qso.mode}</span></td>
-                  <td class="px-4 py-2.5 font-medium text-[#38A169]">
-                    <span class="text-gray-400 text-[10px] font-normal">TX:</span> {qso.rst_sent} 
-                    <span class="text-gray-400 text-[10px] font-normal ml-2">RX:</span> {qso.rst_rcvd}
-                  </td>
-                  <td class="px-4 py-2.5 text-gray-500">
-                    {qso.country} <span class="text-gray-400 text-[10px] ml-1">[{qso.grid || '---'}]</span>
-                  </td>
+        <>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left font-mono text-xs md:text-sm whitespace-nowrap">
+              <thead class="bg-gray-50 text-gray-500 border-b border-gray-200 tracking-wider">
+                <tr>
+                  <th class="px-4 py-3 font-normal align-top">
+                    <div class="text-[10px] uppercase">UTC Time</div>
+                    <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">通联时间</div>
+                  </th>
+                  <th class="px-4 py-3 font-normal align-top">
+                    <div class="text-[10px] uppercase">Callsign</div>
+                    <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">电台呼号</div>
+                  </th>
+                  <th class="px-4 py-3 font-normal align-top">
+                    <div class="text-[10px] uppercase">Band / Mode</div>
+                    <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">频段 / 模式</div>
+                  </th>
+                  <th class="px-4 py-3 font-normal align-top">
+                    <div class="text-[10px] uppercase">Report (TX/RX)</div>
+                    <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">信号报告 (发/收)</div>
+                  </th>
+                  <th class="px-4 py-3 font-normal align-top">
+                    <div class="text-[10px] uppercase">Location [Grid]</div>
+                    <div class="text-[11px] text-gray-500 mt-1 font-sans tracking-normal">位置 [网格]</div>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody class="divide-y divide-gray-100 text-gray-600">
+                {qsoData.map((qso) => (
+                  <tr class="hover:bg-gray-50 transition-colors group">
+                    <td class="px-4 py-2.5 text-gray-400">{qso.time_on}</td>
+                    <td class="px-4 py-2.5 font-bold text-gray-800 group-hover:text-[#38A169] transition-colors">{qso.callsign}</td>
+                    <td class="px-4 py-2.5">{qso.band} <span class="text-gray-400 ml-1">{qso.mode}</span></td>
+                    <td class="px-4 py-2.5 font-medium text-[#38A169]">
+                      <span class="text-gray-400 text-[10px] font-normal">TX:</span> {qso.rst_sent} 
+                      <span class="text-gray-400 text-[10px] font-normal ml-2">RX:</span> {qso.rst_rcvd}
+                    </td>
+                    <td class="px-4 py-2.5 text-gray-500">
+                      {qso.country} <span class="text-gray-400 text-[10px] ml-1">[{qso.grid || '---'}]</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPages > 1 && (
+            <div class="px-4 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center font-mono text-[11px]">
+              <div class="text-gray-400 uppercase tracking-widest">
+                Index: <span class="text-gray-800">{(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, totalHits)}</span> / {totalHits}
+              </div>
+              <div class="flex gap-6">
+                {currentPage > 1 ? (
+                  <a href={"?page=" + (currentPage - 1)} class="text-[#38A169] hover:font-bold transition-all uppercase tracking-widest">
+                    [ PREV_PAGE ]
+                  </a>
+                ) : (
+                  <span class="text-gray-200 cursor-not-allowed uppercase tracking-widest">[ PREV_PAGE ]</span>
+                )}
+
+                {currentPage < totalPages ? (
+                  <a href={"?page=" + (currentPage + 1)} class="text-[#38A169] hover:font-bold transition-all uppercase tracking-widest">
+                    [ NEXT_PAGE ]
+                  </a>
+                ) : (
+                  <span class="text-gray-200 cursor-not-allowed uppercase tracking-widest">[ NEXT_PAGE ]</span>
+                )}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
 
