@@ -1,4 +1,5 @@
 ---
+
 import '../styles/global.css';
 import SEO from '../components/SEO.astro';
 ---
@@ -117,3 +118,85 @@ import SEO from '../components/SEO.astro';
 
 </body>
 </html>
+---
+/* 确保这段 HTML 放在你页面的最后 */
+---
+
+<footer class="ham-webring-footer">
+    <div class="ring-box">
+        <div class="ring-header">📡 FEDIVERSE.RADIO WEB RING</div>
+        <nav class="ring-nav">
+            <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=previous">← BACK</a>
+            <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=random">RANDOM</a>
+            <a href="https://ring.fediverse.radio">HOME</a>
+            <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=next">NEXT →</a>
+        </nav>
+    </div>
+    <div class="legal-info">
+        © {new Date().getFullYear()} BA8BLK | DE OM21EC | 73
+    </div>
+</footer>
+
+<style>
+    /* 强制重置：确保不继承全局的蓝色链接 */
+    .ham-webring-footer {
+        margin-top: 6rem;
+        padding: 4rem 1rem;
+        text-align: center;
+        background-color: transparent; /* 保持和你背景一致 */
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    .ring-box {
+        display: inline-block;
+        border: 1px solid #333; /* 暗灰色边框 */
+        padding: 1.5rem 2.5rem;
+        background: #111; /* 深色背景 */
+        border-radius: 4px;
+    }
+
+    .ring-header {
+        color: #00ff00; /* 经典的“电台绿” */
+        font-size: 0.8rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .ring-nav {
+        display: flex;
+        gap: 25px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* 重点：彻底干掉难看的蓝色链接 */
+    .ring-nav a {
+        color: #888 !important; /* 默认是低调的灰色 */
+        text-decoration: none !important; /* 去掉下划线 */
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid transparent;
+        padding-bottom: 2px;
+    }
+
+    /* 鼠标悬停时的效果：变亮并出现青色底线 */
+    .ring-nav a:hover {
+        color: #00ced1 !important; /* 悬停变青色 */
+        border-bottom: 1px solid #00ced1;
+    }
+
+    /* 防止点击后变紫色 */
+    .ring-nav a:visited {
+        color: #888 !important;
+    }
+
+    .legal-info {
+        margin-top: 2rem;
+        font-size: 0.7rem;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
