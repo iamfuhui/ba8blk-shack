@@ -1,9 +1,13 @@
 ---
-
 import '../styles/global.css';
 import SEO from '../components/SEO.astro';
 ---
+
+<!doctype html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <SEO 
       title="Chinese Amateur Radio Station" 
       description="BA8BLK 业余无线电台控制中心。提供实时通联日志 (QSO)、卡片确认状态查询 (QSL) 以及电波信号博客。"
@@ -22,7 +26,7 @@ import SEO from '../components/SEO.astro';
             z-index: 100;
         }
 
-        /* 2. 核心闪烁动画：模拟电流不稳和荧光粉余辉 */
+        /* 2. 核心闪烁动画 */
         @keyframes crt-flicker {
             0% { opacity: 0.98; filter: brightness(1); }
             5% { opacity: 0.95; filter: brightness(1.05); }
@@ -58,14 +62,75 @@ import SEO from '../components/SEO.astro';
                 linear-gradient(90deg, rgba(82, 255, 0, 0.1) 1px, transparent 1px);
             background-size: 32px 32px;
         }
+
+        /* Webring 专属样式 */
+        .ham-webring-footer {
+            margin-top: 4rem;
+            padding: 4rem 1rem;
+            text-align: center;
+            background-color: transparent;
+            font-family: 'Courier New', Courier, monospace;
+            position: relative;
+            z-index: 10;
+        }
+
+        .ring-box {
+            display: inline-block;
+            border: 1px solid rgba(82, 255, 0, 0.2);
+            padding: 1.5rem 2.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-blur: 4px;
+            border-radius: 4px;
+        }
+
+        .ring-header {
+            color: #52ff00;
+            font-size: 0.7rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 1.2rem;
+            opacity: 0.6;
+        }
+
+        .ring-nav {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .ring-nav a {
+            color: #52ff00 !important;
+            text-decoration: none !important;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid transparent;
+            padding-bottom: 2px;
+            opacity: 0.7;
+        }
+
+        .ring-nav a:hover {
+            opacity: 1;
+            border-bottom: 1px solid #52ff00;
+            text-shadow: 0 0 8px rgba(82, 255, 0, 0.5);
+        }
+
+        .legal-info {
+            margin-top: 2rem;
+            font-size: 0.65rem;
+            color: #52ff00;
+            opacity: 0.3;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
-<body class="bg-[#0a0a0c] text-[#52ff00] min-h-screen flex flex-col items-center justify-center m-0 overflow-hidden font-['JetBrains_Mono'] crt-flicker-effect">
+<body class="bg-[#0a0a0c] text-[#52ff00] min-h-screen flex flex-col items-center m-0 font-['JetBrains_Mono'] crt-flicker-effect">
     
     <div class="crt-overlay"></div>
     <div class="grid-bg"></div>
 
-    <main class="relative z-10 flex flex-col items-center w-full px-6 md:px-4">
+    <main class="relative z-10 flex flex-col items-center w-full px-6 md:px-4 flex-1 pt-20 pb-10">
         
         <p class="text-[10px] sm:text-xs md:text-sm tracking-[0.5em] md:tracking-[0.8em] mb-4 opacity-70 ml-[0.5em] md:ml-[0.8em] uppercase font-bold text-center">
             Chinese Amateur Radio Station
@@ -103,10 +168,24 @@ import SEO from '../components/SEO.astro';
                 </a>
             ))}
         </div>
-
     </main>
 
-    <div class="fixed bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8 flex justify-between items-center text-[9px] md:text-[10px] opacity-40 tracking-[0.2em] md:tracking-[0.3em] font-light">
+    <footer class="ham-webring-footer">
+        <div class="ring-box">
+            <div class="ring-header">📡 FEDIVERSE.RADIO WEB RING</div>
+            <nav class="ring-nav">
+                <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=previous">← BACK</a>
+                <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=random">RANDOM</a>
+                <a href="https://ring.fediverse.radio">HOME</a>
+                <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=next">NEXT →</a>
+            </nav>
+        </div>
+        <div class="legal-info">
+            © {new Date().getFullYear()} BA8BLK | DE OM21EC | 73
+        </div>
+    </footer>
+
+    <div class="w-full max-w-7xl mx-auto px-6 pb-8 flex justify-between items-center text-[9px] md:text-[10px] opacity-40 tracking-[0.2em] md:tracking-[0.3em] font-light z-10">
         <div class="flex items-center gap-2">
             <div class="w-1.5 h-1.5 bg-[#52ff00] rounded-full animate-pulse shadow-[0_0_8px_rgba(82,255,0,0.8)]"></div>
             RX_READY
@@ -118,82 +197,3 @@ import SEO from '../components/SEO.astro';
 
 </body>
 </html>
-
-<footer class="ham-webring-footer">
-    <div class="ring-box">
-        <div class="ring-header">📡 FEDIVERSE.RADIO WEB RING</div>
-        <nav class="ring-nav">
-            <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=previous">← BACK</a>
-            <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=random">RANDOM</a>
-            <a href="https://ring.fediverse.radio">HOME</a>
-            <a href="https://ring.fediverse.radio/ring.php?site=ba8blk.com&direction=next">NEXT →</a>
-        </nav>
-    </div>
-    <div class="legal-info">
-        © {new Date().getFullYear()} BA8BLK | DE OM21EC | 73
-    </div>
-</footer>
-
-<style>
-    /* 强制重置：确保不继承全局的蓝色链接 */
-    .ham-webring-footer {
-        margin-top: 6rem;
-        padding: 4rem 1rem;
-        text-align: center;
-        background-color: transparent; /* 保持和你背景一致 */
-        font-family: 'Courier New', Courier, monospace;
-    }
-
-    .ring-box {
-        display: inline-block;
-        border: 1px solid #333; /* 暗灰色边框 */
-        padding: 1.5rem 2.5rem;
-        background: #111; /* 深色背景 */
-        border-radius: 4px;
-    }
-
-    .ring-header {
-        color: #00ff00; /* 经典的“电台绿” */
-        font-size: 0.8rem;
-        font-weight: bold;
-        letter-spacing: 2px;
-        margin-bottom: 1.5rem;
-        opacity: 0.8;
-    }
-
-    .ring-nav {
-        display: flex;
-        gap: 25px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    /* 重点：彻底干掉难看的蓝色链接 */
-    .ring-nav a {
-        color: #888 !important; /* 默认是低调的灰色 */
-        text-decoration: none !important; /* 去掉下划线 */
-        font-size: 0.85rem;
-        transition: all 0.2s ease;
-        border-bottom: 1px solid transparent;
-        padding-bottom: 2px;
-    }
-
-    /* 鼠标悬停时的效果：变亮并出现青色底线 */
-    .ring-nav a:hover {
-        color: #00ced1 !important; /* 悬停变青色 */
-        border-bottom: 1px solid #00ced1;
-    }
-
-    /* 防止点击后变紫色 */
-    .ring-nav a:visited {
-        color: #888 !important;
-    }
-
-    .legal-info {
-        margin-top: 2rem;
-        font-size: 0.7rem;
-        color: #444;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-</style>
