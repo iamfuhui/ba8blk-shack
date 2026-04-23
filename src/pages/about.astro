@@ -3,7 +3,6 @@ import '../styles/global.css';
 import SEO from '../components/SEO.astro'; 
 
 // 1. 获取访客实时数据 (Cloudflare 提供)
-// 在本地开发环境，这些值可能为 null，所以我们提供回退字符串
 const country = Astro.request.headers.get('cf-ipcountry') || 'CN';
 const city = Astro.request.headers.get('cf-ipcity') || 'CHENGDU';
 const ip = Astro.request.headers.get('cf-connecting-ip') || '127.0.0.1';
@@ -13,16 +12,16 @@ const browser = Astro.request.headers.get('user-agent')?.split(' ')[0] || 'UNKNO
 const maskedIp = ip.split('.').slice(0, 2).join('.') + '.x.x';
 const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
 
-// 3. 随机信号强度模拟 (用于增加真实感)
-const signalStrength = Math.floor(Math.random() * 4) + 6; // 模拟 S6-S9 的信号强度
+// 3. 随机信号强度模拟
+const signalStrength = Math.floor(Math.random() * 4) + 6; // 模拟 S6-S9
 ---
 
 <html lang="zh-CN">
 <head>
     <SEO 
-      title="ABOUT // 运营商信息" 
-      description="了解 BA8BLK 电台及其操作员 Hui。这里记录了台站坐标四川  (OM21EC)、所用设备以及对业余无线电的热爱。"
-      keywords="BA8BLK是谁, 四川 HAM, 业余无线电操作员, OM21EC, 无线电台站介绍"
+      title="ABOUT // 操作员信息" 
+      description="了解 BA8BLK 电台及其操作员 Hui。这里记录了台站坐标四川 (OM21EC)、所用设备以及对业余无线电的热爱。"
+      keywords="BA8BLK, 四川 HAM, 业余无线电操作员, OM21EC, 无线电台站介绍, 业余无线电技术"
     />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" />
 </head>
@@ -38,45 +37,45 @@ const signalStrength = Math.floor(Math.random() * 4) + 6; // 模拟 S6-S9 的信
         <section class="mb-20">
             <h1 class="text-4xl font-bold tracking-tight mb-6">ABOUT // OPERATOR_INFO</h1>  
 
-<article class="space-y-10 text-gray-800 leading-relaxed">
-  
-  <section>
-    <p class="text-lg mb-2">
-      这里是 <span class="font-bold">BA8BLK</span>，一名位于中国第 8 区的业余无线电爱好者。
-    </p>
-    <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
-      This is <span class="font-bold">BA8BLK</span>, an amateur radio enthusiast located in Zone 8, China.
-    </p>
-  </section>
+            <article class="space-y-10 text-gray-800 leading-relaxed">
+              
+              <section>
+                <p class="text-lg mb-2">
+                  这里是 <span class="font-bold">BA8BLK</span>，一名位于中国第 8 区的业余无线电操作员。
+                </p>
+                <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
+                  This is <span class="font-bold">BA8BLK</span>, an amateur radio operator located in Zone 8, China.
+                </p>
+              </section>
 
-  <section>
-    <p class="text-lg mb-2">
-      本站是我个人的数字通联日志，记录关于无线电技术、代码开发以及生活中的零散信号。
-    </p>
-    <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
-      This site serves as my personal digital logbook, capturing fragments of radio technology, code development, and the scattered signals of daily life.
-    </p>
-  </section>
+              <section>
+                <p class="text-lg mb-2">
+                  本站是我个人的数字通联日志，记录关于无线电技术、代码开发以及生活中的零散信号。
+                </p>
+                <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
+                  This site serves as my personal digital logbook, capturing fragments of radio technology, code development, and the scattered signals of daily life.
+                </p>
+              </section>
 
-  <section>
-    <p class="text-lg mb-2">
-      我坚信在这个高度连接的时代，依然有些信号值得跨越山海去捕捉。
-    </p>
-    <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
-      I firmly believe that in this hyper-connected era, there are still signals worth chasing across mountains and seas.
-    </p>
-  </section>
+              <section>
+                <p class="text-lg mb-2">
+                  我坚信在这个高度连接的时代，依然有些信号值得跨越山海去捕捉。
+                </p>
+                <p class="text-sm text-gray-500 font-['JetBrains_Mono'] leading-snug">
+                  I firmly believe that in this hyper-connected era, there are still signals worth chasing across mountains and seas.
+                </p>
+              </section>
 
-  <div class="border-l-4 border-[#38A169] pl-6 py-2 mt-12 bg-gray-50">
-    <p class="text-gray-700 italic mb-1">
-      73 是我们最诚挚的敬意，是对远方友谊的最终确认。
-    </p>
-    <p class="text-xs text-gray-400 font-['JetBrains_Mono']">
-      73 is our sincerest regard, the ultimate confirmation of friendship from afar.
-    </p>
-  </div>
+              <div class="border-l-4 border-[#38A169] pl-6 py-2 mt-12 bg-gray-50">
+                <p class="text-gray-700 italic mb-1">
+                  73 是我们最诚挚的敬意，是对远方友谊的最终确认。
+                </p>
+                <p class="text-xs text-gray-400 font-['JetBrains_Mono']">
+                  73 is our sincerest regard, the ultimate confirmation of friendship from afar.
+                </p>
+              </div>
 
-</article>
+            </article>
         </section>
 
         <section class="border border-black/10 bg-black/[0.02] p-8 rounded-sm relative overflow-hidden">
