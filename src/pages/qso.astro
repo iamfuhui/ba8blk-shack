@@ -14,28 +14,23 @@ interface QsoRecord {
   grid: string;
 }
 
-// 1. 排序逻辑
+// 1. 服务端预处理：排序逻辑
 const allSortedData = (rawQsoData as QsoRecord[]).sort((a, b) => {
   return new Date(b.time_on).getTime() - new Date(a.time_on).getTime();
 });
 
-// 2. 分页参数
+// 2. 参数定义
 const pageSize = 25;
 const totalHits = allSortedData.length;
-const { searchParams } = Astro.url;
-const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1'));
 const totalPages = Math.ceil(totalHits / pageSize);
 
-// 3. 截取当前页数据
-const qsoData = allSortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-// 4. 统计
+// 3. 统计逻辑
 const uniqueCallsigns = totalHits > 0 
   ? [...new Set(allSortedData.map(q => q.callsign))].length 
   : 0;
 
-// 预处理分页字符串，避免在模板里写复杂的逻辑
-const pageStatus = totalHits > 0 ? "PAGE: " + currentPage + " / " + totalPages : "Standby";
+// 将全量数据序列化，用于客户端 JS 处理翻页
+const serializedData = JSON.stringify(allSortedData);
 ---
 
 <!DOCTYPE html>
@@ -91,8 +86,8 @@ const pageStatus = totalHits > 0 ? "PAGE: " + currentPage + " / " + totalPages :
         <span class={totalHits > 0 ? "animate-pulse" : "opacity-50"}>●</span>
         <span>Terminal_Monitor_Active</span>
       </div>
-      <span class="opacity-60 text-gray-400">
-        {pageStatus}
+      <span id="page-status" class="opacity-60 text-gray-400">
+        {totalHits > 0 ? `PAGE: 1 / ${totalPages}` : "Standby"}
       </span>
     </div>
 
@@ -129,8 +124,8 @@ const pageStatus = totalHits > 0 ? "PAGE: " + currentPage + " / " + totalPages :
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100 text-gray-600">
-                {qsoData.map((qso) => (
+              <tbody id="qso-body" class="divide-y divide-gray-100 text-gray-600">
+                {allSortedData.slice(0, pageSize).map((qso) => (
                   <tr class="hover:bg-gray-50 transition-colors group">
                     <td class="px-4 py-2.5 text-gray-400">{qso.time_on}</td>
                     <td class="px-4 py-2.5 font-bold text-gray-800 group-hover:text-[#38A169] transition-colors">{qso.callsign}</td>
@@ -148,34 +143,99 @@ const pageStatus = totalHits > 0 ? "PAGE: " + currentPage + " / " + totalPages :
             </table>
           </div>
 
-          {totalPages > 1 && (
-            <div class="px-4 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center font-mono text-[11px]">
-              <div class="text-gray-400 uppercase tracking-widest">
-                Index: <span class="text-gray-800">{(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, totalHits)}</span> / {totalHits}
-              </div>
-              <div class="flex gap-6">
-                {currentPage > 1 ? (
-                  <a href={"?page=" + (currentPage - 1)} class="text-[#38A169] hover:font-bold transition-all uppercase tracking-widest">
-                    [ PREV_PAGE ]
-                  </a>
-                ) : (
-                  <span class="text-gray-200 cursor-not-allowed uppercase tracking-widest">[ PREV_PAGE ]</span>
-                )}
-
-                {currentPage < totalPages ? (
-                  <a href={"?page=" + (currentPage + 1)} class="text-[#38A169] hover:font-bold transition-all uppercase tracking-widest">
-                    [ NEXT_PAGE ]
-                  </a>
-                ) : (
-                  <span class="text-gray-200 cursor-not-allowed uppercase tracking-widest">[ NEXT_PAGE ]</span>
-                )}
-              </div>
+          <div id="pagination-nav" class="px-4 py-6 sm:py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 font-mono text-[11px]">
+            <div class="text-gray-400 uppercase tracking-widest order-2 sm:order-1">
+              Index: <span id="index-range" class="text-gray-800">1 - {Math.min(pageSize, totalHits)}</span> / {totalHits}
             </div>
-          )}
+            <div class="flex gap-4 sm:gap-6 order-1 sm:order-2">
+              <button id="prev-btn" class="text-[#38A169] hover:font-bold disabled:text-gray-200 disabled:cursor-not-allowed transition-all uppercase tracking-widest py-2 px-1">
+                [ PREV_PAGE ]
+              </button>
+              <button id="next-btn" class="text-[#38A169] hover:font-bold disabled:text-gray-200 disabled:cursor-not-allowed transition-all uppercase tracking-widest py-2 px-1">
+                [ NEXT_PAGE ]
+              </button>
+            </div>
+          </div>
         </>
       )}
     </div>
-
   </div>
+
+  <script define:vars={{ serializedData, pageSize, totalHits, totalPages }}>
+    const data = JSON.parse(serializedData);
+    const tbody = document.getElementById('qso-body');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const pageStatus = document.getElementById('page-status');
+    const indexRange = document.getElementById('index-range');
+
+    function getPageFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return Math.max(1, parseInt(params.get('page') || '1'));
+    }
+
+    function updateTable(page) {
+      const start = (page - 1) * pageSize;
+      const end = Math.min(start + pageSize, totalHits);
+      const pageData = data.slice(start, end);
+
+      // 渲染表格行
+      tbody.innerHTML = pageData.map(qso => `
+        <tr class="hover:bg-gray-50 transition-colors group">
+          <td class="px-4 py-2.5 text-gray-400">${qso.time_on}</td>
+          <td class="px-4 py-2.5 font-bold text-gray-800 group-hover:text-[#38A169] transition-colors">${qso.callsign}</td>
+          <td class="px-4 py-2.5">${qso.band} <span class="text-gray-400 ml-1">${qso.mode}</span></td>
+          <td class="px-4 py-2.5 font-medium text-[#38A169]">
+            <span class="text-gray-400 text-[10px] font-normal">TX:</span> ${qso.rst_sent} 
+            <span class="text-gray-400 text-[10px] font-normal ml-2">RX:</span> ${qso.rst_rcvd}
+          </td>
+          <td class="px-4 py-2.5 text-gray-500">
+            ${qso.country} <span class="text-gray-400 text-[10px] ml-1">[${qso.grid || '---'}]</span>
+          </td>
+        </tr>
+      `).join('');
+
+      // 更新界面 UI 状态
+      pageStatus.innerText = `PAGE: ${page} / ${totalPages}`;
+      indexRange.innerText = `${start + 1} - ${end}`;
+
+      // 处理按钮禁用逻辑
+      prevBtn.disabled = (page <= 1);
+      nextBtn.disabled = (page >= totalPages);
+
+      // 无刷新更新 URL 参数
+      const newUrl = page === 1 ? window.location.pathname : `?page=${page}`;
+      window.history.pushState({ page }, '', newUrl);
+      
+      // 自动滚回顶部（可选，提升用户体验）
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    if (prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => {
+        const current = getPageFromUrl();
+        if (current > 1) updateTable(current - 1);
+      });
+
+      nextBtn.addEventListener('click', () => {
+        const current = getPageFromUrl();
+        if (current < totalPages) updateTable(current + 1);
+      });
+
+      // 响应浏览器前进/后退
+      window.addEventListener('popstate', () => {
+        updateTable(getPageFromUrl());
+      });
+
+      // 初始化：根据 URL 参数直接展示对应页面
+      const initialPage = getPageFromUrl();
+      if (initialPage !== 1) {
+        updateTable(initialPage);
+      } else {
+        prevBtn.disabled = true;
+        nextBtn.disabled = (totalPages <= 1);
+      }
+    }
+  </script>
 </body>
 </html>
