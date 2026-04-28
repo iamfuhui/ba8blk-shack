@@ -2,182 +2,224 @@
 import '../styles/global.css'; 
 import rawQsoData from '../data/qso.json'; 
 import SEO from '../components/SEO.astro';
+
+// 核心配置
+const HOME_GRID = "OM21ec"; 
 ---
 
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <SEO 
-      title="QSL CHECK" 
-      description="BA8BLK 业余无线电通联卡片 (QSL) 确认状态查询。输入您的呼号即可获取实时通联确认情况及电子卡片状态。"
-      keywords="BA8BLK, QSL查询, 业余无线电卡片, 通联确认, HAM QSL, 呼号搜索"
+      title="QSL & ATLAS - BA8BLK" 
+      description="BA8BLK 全球通联足迹分布图。展示业余无线电通联历史与地理分布。"
     />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .map-frame { 
+            height: 600px; 
+            width: 100%; 
+            background: #F3F4F6; 
+            border: 1px solid #e5e7eb; 
+            z-index: 1; 
+        }
+
+        /* 搜索高亮动画 */
+        .highlight-trace {
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            animation: draw-trace 2s forwards cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 0 12px #38A169);
+        }
+        @keyframes draw-trace { to { stroke-dashoffset: 0; } }
+
+        .leaflet-control-zoom { border: none !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; }
+        .leaflet-control-zoom-in, .leaflet-control-zoom-out { 
+            background-color: #fff !important; color: #38A169 !important; font-weight: bold !important; 
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
+    </style>
 </head>
 <body class="bg-[#F8F9FA] min-h-screen m-0 font-sans text-gray-900 selection:bg-[#38A169] selection:text-white">
 
-  <div class="max-w-3xl mx-auto px-4 relative">
-    <div class="absolute top-8 left-4 md:left-0">
-      <a 
-        href="/" 
-        class="text-[11px] font-['JetBrains_Mono'] text-gray-400 hover:text-[#38A169] transition-colors flex items-center gap-2 group uppercase tracking-widest"
-      >
-        <span class="group-hover:-translate-x-1 transition-transform inline-block">←</span>
-        <span>Return_to_Console 返回工作台</span>
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    
+    <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+      <div>
+        <h1 class="text-4xl font-black tracking-tighter uppercase">Signal Atlas</h1>
+        <p class="text-[11px] font-['JetBrains_Mono'] text-gray-400 uppercase tracking-[0.3em]">
+          Global Signal Footprint // 信号通联图谱
+        </p>
+      </div>
+      <a href="/" class="text-[10px] font-['JetBrains_Mono'] border border-gray-200 px-4 py-2 hover:bg-white hover:shadow-sm transition-all flex items-center gap-2 uppercase tracking-widest">
+        <span>←</span> 返回工作台 / Return_to_Console
       </a>
     </div>
-  </div>
 
-  <div class="max-w-3xl mx-auto py-12 px-4">
-    
-    <div class="mb-10 mt-8 md:mt-12">
-      <h1 class="text-3xl font-bold tracking-widest uppercase mb-2 flex items-center gap-3">
-        <span>QSL 查询</span>
-        <span class="text-gray-300 font-light">/</span> 
-        <span class="text-xl text-gray-500 font-['JetBrains_Mono'] mt-1">QSL CHECK</span>
-      </h1>
-      <p class="text-sm text-gray-500 leading-relaxed">
-        输入您的呼号，查询与 BA8BLK 的通联记录及 QSL 卡片确认状态。<br/>
-        <span class="text-xs text-gray-400 font-['JetBrains_Mono'] mt-1 block">Enter your callsign to check QSO records and QSL card status with BA8BLK.</span>
-      </p>
-    </div>
+    <div id="map" class="map-frame rounded-t-2xl overflow-hidden shadow-sm"></div>
 
-    <div class="bg-white border border-gray-200 rounded-sm p-6 md:p-8 shadow-sm font-['JetBrains_Mono']">
+    <div class="bg-white border border-gray-200 border-t-0 rounded-b-2xl p-6 md:p-10 shadow-lg font-['JetBrains_Mono']">
       
-      <div class="flex justify-between items-center text-xs text-[#38A169] mb-8 uppercase tracking-wider">
-        <div class="flex items-center gap-2">
-          <span class="animate-pulse">●</span>
-          <span id="system-status">System_Ready <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 系统就绪</span></span>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10 items-end">
+        <div class="md:col-span-2 relative">
+            <label class="block text-[10px] text-gray-400 mb-3 uppercase tracking-widest italic">
+                呼号数据库查询 / Query_Callsign_Database
+            </label>
+            <div class="flex items-center gap-4 border-b-2 border-gray-100 focus-within:border-[#38A169] transition-all pb-3">
+                <span class="text-xl font-bold text-[#38A169] select-none">></span>
+                <input 
+                    type="text" 
+                    id="query-input"
+                    placeholder="SCAN CALLSIGN..." 
+                    class="w-full bg-transparent text-3xl font-black text-gray-800 uppercase outline-none placeholder-gray-100"
+                    autocomplete="off"
+                />
+            </div>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 flex justify-around">
+            <div class="text-center">
+                <div class="text-[9px] text-gray-400 uppercase mb-1">通联总数 / Total_QSO</div>
+                <div class="text-2xl font-black text-gray-800" id="total-qso-count">0</div>
+            </div>
+            <div class="w-[1px] bg-gray-200 mx-2"></div>
+            <div class="text-center">
+                <div class="text-[9px] text-gray-400 uppercase mb-1">系统状态 / Status</div>
+                <div class="text-xs font-bold text-[#38A169] mt-2 uppercase tracking-tighter" id="system-status">DATABASE_READY</div>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <button id="search-btn" class="w-full bg-gray-900 text-white py-3 rounded text-[11px] font-black uppercase hover:bg-[#38A169] transition-all shadow-md tracking-widest">
+                执行追踪 / Execute_Trace
+            </button>
+            <button id="reset-btn" class="w-full bg-white border border-gray-200 text-gray-400 py-2 rounded text-[9px] font-bold uppercase hover:text-gray-600 transition-all">
+                重置图谱 / Reset_Atlas
+            </button>
         </div>
       </div>
 
-      <div class="mb-10 relative">
-        <div class="flex items-end gap-4 border-b-2 border-gray-300 focus-within:border-[#38A169] transition-colors pb-2">
-          <span class="text-gray-400 text-lg sm:text-2xl select-none">></span>
-          <input 
-            type="text" 
-            id="query-input"
-            placeholder="ENTER CALLSIGN // 输入呼号" 
-            class="w-full bg-transparent text-2xl sm:text-3xl font-bold text-gray-800 uppercase outline-none placeholder-gray-300 placeholder:text-xl placeholder:font-normal"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <button 
-            id="search-btn"
-            class="flex items-center whitespace-nowrap shrink-0 bg-[#38A169] text-white text-xs px-4 py-2 sm:px-5 rounded-sm hover:bg-green-700 transition-colors uppercase tracking-widest cursor-pointer">
-            QUERY <span class="hidden xs:inline opacity-70 ml-1 text-[10px] tracking-normal font-sans">// 查询</span>
-          </button>
-        </div>
-      </div>
-
-      <div id="results-container" class="space-y-4">
-        <div class="text-sm text-gray-400 italic">
-          Awaiting_Input... <span class="opacity-60 ml-1 font-sans tracking-normal not-italic">// 等待指令...</span>
-        </div>
+      <div id="results-display" class="custom-scroll max-h-[300px] overflow-y-auto pr-4 space-y-4">
+          <div class="text-[10px] text-gray-300 uppercase italic tracking-widest text-center py-8">
+            等待遥测指令... / Awaiting telemetry command...
+          </div>
       </div>
 
     </div>
+
+    <div class="mt-8 text-center">
+        <p class="text-[9px] font-['JetBrains_Mono'] text-gray-400 uppercase tracking-widest">
+            © BA8BLK / 地图数据由 Leaflet & CartoDB 提供 / 纯前端数据渲染
+        </p>
+    </div>
   </div>
 
-  <script define:vars={{ logbookData: rawQsoData }}>
-    console.log("[系统启动] 1. QSL 查询脚本开始加载...");
-    console.log(`[数据加载] 2. 成功读取内置数据！当前共有 ${logbookData.length} 条记录。`);
-    
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script define:vars={{ logbookData: rawQsoData, HOME_GRID }}>
+    // 1. 工具：坐标转换
+    function gridToLatLon(grid) {
+      if (!grid || grid.length < 4) return null;
+      grid = grid.toUpperCase();
+      let lon = (grid.charCodeAt(0) - 65) * 20 - 180;
+      let lat = (grid.charCodeAt(1) - 65) * 10 - 90;
+      lon += (grid.charCodeAt(2) - 48) * 2;
+      lat += (grid.charCodeAt(3) - 48) * 1;
+      if (grid.length >= 6) {
+        lon += (grid.charCodeAt(4) - 65) * (2 / 24) + (1 / 24);
+        lat += (grid.charCodeAt(5) - 65) * (1 / 24) + (0.5 / 24);
+      } else { lon += 1; lat += 0.5; }
+      return [lat, lon];
+    }
+
+    // 2. 初始化地图
+    const homeCoords = gridToLatLon(HOME_GRID);
+    const map = L.map('map', { 
+      center: [25, 100], zoom: 3, zoomControl: true, 
+      scrollWheelZoom: false, attributionControl: false,
+      worldCopyJump: true 
+    });
+    map.zoomControl.setPosition('bottomright');
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+
+    const historyLayer = L.layerGroup().addTo(map);
+    const focusLayer = L.layerGroup().addTo(map);
+
+    // 3. 渲染历史通联
+    let validQsoCount = 0;
+    logbookData.forEach(qso => {
+      const coords = gridToLatLon(qso.grid || qso.GRIDSQUARE);
+      if (coords) {
+        validQsoCount++;
+        L.polyline([homeCoords, coords], { color: '#38A169', weight: 0.8, opacity: 0.08, interactive: false }).addTo(historyLayer);
+        L.circleMarker(coords, { radius: 1, fillColor: '#38A169', fillOpacity: 0.15, stroke: false, interactive: false }).addTo(historyLayer);
+      }
+    });
+    document.getElementById('total-qso-count').innerText = validQsoCount;
+
+    // 4. 搜索与交互逻辑
     const inputEl = document.getElementById('query-input');
-    const btnEl = document.getElementById('search-btn');
-    const resultsEl = document.getElementById('results-container');
+    const searchBtn = document.getElementById('search-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const resultsEl = document.getElementById('results-display');
     const statusEl = document.getElementById('system-status');
 
-    if (statusEl) {
-       statusEl.innerHTML = `Database_Loaded // ${logbookData.length}_Records <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 数据就绪</span>`;
-    }
-
-    // 搜索执行函数
     function performSearch() {
-      const rawQuery = inputEl.value.trim().toUpperCase();
-      console.log(`[搜索触发] 3. 用户输入了关键词: "${rawQuery}"`);
+      const query = inputEl.value.trim().toUpperCase();
+      if (!query) return;
 
-      if (!rawQuery) {
-        resultsEl.innerHTML = '<div class="text-sm text-gray-400 italic">Awaiting_Input... <span class="opacity-60 ml-1 font-sans tracking-normal not-italic">// 等待指令...</span></div>';
-        return;
-      }
+      focusLayer.clearLayers();
+      const hits = logbookData.filter(d => (d.callsign || d.CALL || "").toUpperCase().includes(query));
 
-      statusEl.innerHTML = `Searching_Index // ${rawQuery} <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 检索中</span>`;
+      if (hits.length > 0) {
+        statusEl.innerText = "TRACE_LOCKED";
+        statusEl.style.color = "#38A169";
+        const bounds = L.latLngBounds([homeCoords]);
+        resultsEl.innerHTML = `<div class="text-[10px] text-[#38A169] mb-4 font-bold uppercase tracking-widest">信号已锁定 / Target_Locked: ${hits.length} Entry Found</div>`;
 
-      // 过滤数据 (这时候 logbookData 里已经是实实在在的数据了)
-      const hits = logbookData.filter(qso => {
-        const targetCall = (qso.call || qso.callsign || "").toUpperCase();
-        return targetCall.includes(rawQuery);
-      });
-
-      if (hits.length === 0) {
-        resultsEl.innerHTML = `
-          <div class="text-red-500 text-sm mt-4">
-            [!] NO_RECORDS_FOUND: "${rawQuery}" <span class="opacity-60 ml-1 font-sans tracking-normal">// 未找到相关通联记录</span>
-          </div>
-        `;
-      } else {
-        let htmlString = `<div class="text-xs text-gray-500 mb-4">MATCH_FOUND: ${hits.length} RECORD(S) <span class="opacity-60 ml-1 font-sans tracking-normal">// 匹配结果</span></div>`;
-        
         hits.forEach(qso => {
-          const displayCall = qso.call || qso.callsign || "UNKNOWN";
-          const displayDate = qso.date || (qso.time_on ? qso.time_on.split(' ')[0] : "N/A");
-          const displayTime = qso.time || (qso.time_on ? qso.time_on.split(' ')[1] : "");
-          
-          const isConfirmed = qso.qsl === true; 
-          const statusColor = isConfirmed ? 'text-[#38A169] border-[#38A169]' : 'text-yellow-600 border-yellow-600';
-          const displayQsl = isConfirmed ? 'CONFIRMED' : 'PENDING';
-          
-          htmlString += `
-            <div class="border border-gray-200 bg-[#F8F9FA] p-4 rounded-sm hover:border-gray-400 transition-colors mb-4">
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4 text-sm w-full">
-                 <div>
-                   <div class="text-gray-400 text-xs flex items-center gap-1 mb-1 tracking-wide">
-                     CALLSIGN <span class="opacity-50 text-[10px] mt-[1px] font-sans tracking-normal">// 呼号</span>
-                   </div>
-                   <div class="font-bold text-lg font-sans text-gray-900">${displayCall}</div>
-                 </div>
-                 <div>
-                   <div class="text-gray-400 text-xs flex items-center gap-1 mb-1 tracking-wide">
-                     TIMESTAMP <span class="opacity-50 text-[10px] mt-[1px] font-sans tracking-normal">// 时间</span>
-                   </div>
-                   <div class="text-gray-700">${displayDate} ${displayTime}</div>
-                 </div>
-                 <div>
-                   <div class="text-gray-400 text-xs flex items-center gap-1 mb-1 tracking-wide">
-                     TERMINAL <span class="opacity-50 text-[10px] mt-[1px] font-sans tracking-normal">// 终端</span>
-                   </div>
-                   <div class="text-gray-700">${qso.band || 'N/A'} // ${qso.mode || 'N/A'}</div>
-                 </div>
-                 <div class="md:text-right flex flex-col md:items-end">
-                    <div class="text-gray-400 text-xs flex items-center md:justify-end gap-1 mb-1 tracking-wide">
-                      STATUS <span class="opacity-50 text-[10px] mt-[1px] font-sans tracking-normal">// 状态</span>
-                    </div>
-                    <div class="font-bold px-2 py-1 border ${statusColor} text-xs rounded-sm inline-block">${displayQsl}</div>
-                 </div>
+          const callsign = qso.callsign || qso.CALL;
+          const coords = gridToLatLon(qso.grid || qso.GRIDSQUARE);
+          if (coords) {
+            L.polyline([homeCoords, coords], { color: '#38A169', weight: 4, opacity: 0.8, className: 'highlight-trace' }).addTo(focusLayer);
+            L.circleMarker(coords, { radius: 8, fillColor: '#38A169', color: '#fff', weight: 3, fillOpacity: 1 }).addTo(focusLayer).bindPopup(`<b>${callsign}</b>`).openPopup();
+            bounds.extend(coords);
+          }
+          resultsEl.innerHTML += `
+            <div class="bg-gray-50 border-l-4 border-[#38A169] p-5 flex justify-between items-center group hover:bg-gray-100 transition-all">
+              <div>
+                <div class="text-2xl font-black text-gray-800 tracking-tighter">${callsign}</div>
+                <div class="text-[10px] text-gray-400 mt-1 uppercase">${qso.time_on || qso.QSO_DATE} // ${qso.band || qso.BAND} // ${qso.mode || qso.MODE}</div>
               </div>
-            </div>
-          `;
+              <div class="text-right">
+                <div class="text-[9px] text-gray-400 uppercase mb-1">信号报告 / RST</div>
+                <div class="text-xl font-bold text-[#38A169]">${qso.rst_rcvd || qso.RST_RCVD}</div>
+              </div>
+            </div>`;
         });
-        resultsEl.innerHTML = htmlString;
+        map.flyToBounds(bounds, { padding: [100, 100], duration: 1.5 });
+      } else {
+        statusEl.innerText = "SIGNAL_LOST";
+        statusEl.style.color = "#EF4444";
+        resultsEl.innerHTML = `<div class="text-red-500 font-bold text-[10px] uppercase tracking-widest text-center py-8">[!] 未找到该呼号轨迹 / NO_TRACE_FOUND: ${query}</div>`;
       }
-      
-      setTimeout(() => {
-        statusEl.innerHTML = `System_Ready // Enter_Callsign <span class="opacity-60 ml-1 text-[10px] font-sans tracking-normal">// 等待输入</span>`;
-      }, 1000);
     }
 
-    if (btnEl && inputEl) {
-      // 1. 监听鼠标点击 QUERY 按钮
-      btnEl.addEventListener('click', performSearch);
-      
-      // 2. 监听键盘敲击 Enter 回车键
-      inputEl.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
-      });
-
-      // (删除了原有的 input 实时监听逻辑，系统不再抢答)
+    function resetAtlas() {
+        focusLayer.clearLayers();
+        inputEl.value = "";
+        statusEl.innerText = "DATABASE_READY";
+        statusEl.style.color = "#38A169";
+        resultsEl.innerHTML = `<div class="text-[10px] text-gray-300 uppercase italic tracking-widest text-center py-8">等待遥测指令... / Awaiting telemetry command...</div>`;
+        map.flyTo([25, 100], 3);
     }
+
+    searchBtn.addEventListener('click', performSearch);
+    resetBtn.addEventListener('click', resetAtlas);
+    inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
   </script>
 </body>
 </html>
