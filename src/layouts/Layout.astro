@@ -1,12 +1,27 @@
+---
+// src/layouts/Layout.astro
+// 公共布局：统一语言、标题与 SEO 信息，页面通过 props 传入各自的标题和描述
+import SEO from '../components/SEO.astro';
+
+export interface Props {
+    title: string;
+    description?: string;
+    keywords?: string;
+    image?: string;
+    lang?: string;
+}
+
+const { title, description, keywords, image, lang = 'zh-CN' } = Astro.props;
+---
+
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width" />
+        <SEO title={title} description={description} keywords={keywords} image={image} />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="generator" content={Astro.generator} />
-        <title>BA8BLK - Amateur Radio & Tech</title>
+        <slot name="head" />
     </head>
     <body>
         <slot />

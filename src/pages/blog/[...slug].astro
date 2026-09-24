@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import '../../styles/global.css';
+import SEO from '../../components/SEO.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -16,9 +17,10 @@ const { Content } = await post.render();
 
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{post.data.title} // BA8BLK</title>
+    <SEO
+      title={post.data.title}
+      description={post.data.description}
+    />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" />
 </head>
 <body class="bg-[#fbfbfb] text-[#171717] antialiased font-['JetBrains_Mono','Noto_Sans_SC']">
@@ -75,4 +77,4 @@ const { Content } = await post.render();
         });
     </script>
 </body>
-</html>
+</html>
