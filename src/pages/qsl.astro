@@ -1,225 +1,26 @@
 ---
-import '../styles/global.css'; 
-import rawQsoData from '../data/qso.json'; 
-import SEO from '../components/SEO.astro';
-
-// 核心配置
-const HOME_GRID = "OM21ec"; 
+// QSL 查询已迁移至独立系统 qsl.ba8blk.com，本页仅做跳转，保留旧链接与书签可用。
+// 原"QSL & ATLAS"页面代码见 git 历史（2fb7921 及更早版本）。
+const TARGET = 'https://qsl.ba8blk.com';
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <SEO 
-      title="QSL & ATLAS - BA8BLK" 
-      description="BA8BLK 全球通联足迹分布图。展示业余无线电通联历史与地理分布。"
-    />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QSL 查询已迁移 // BA8BLK</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={TARGET} />
+    <meta http-equiv="refresh" content={`0; url=${TARGET}`} />
+    <script is:inline define:vars={{ TARGET }}>location.replace(TARGET);</script>
     <style>
-        .map-frame { 
-            height: 600px; 
-            width: 100%; 
-            background: #F3F4F6; 
-            border: 1px solid #e5e7eb; 
-            z-index: 1; 
-        }
-
-        /* 搜索高亮动画 */
-        .highlight-trace {
-            stroke-dasharray: 2000;
-            stroke-dashoffset: 2000;
-            animation: draw-trace 2s forwards cubic-bezier(0.4, 0, 0.2, 1);
-            filter: drop-shadow(0 0 12px #38A169);
-        }
-        @keyframes draw-trace { to { stroke-dashoffset: 0; } }
-
-        .leaflet-control-zoom { border: none !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; }
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out { 
-            background-color: #fff !important; color: #38A169 !important; font-weight: bold !important; 
-        }
-
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
+        body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+               background: #0a0a0c; color: #52ff00; font-family: 'JetBrains Mono', monospace; text-align: center; padding: 16px; }
+        a { color: #52ff00; }
     </style>
 </head>
-<body class="bg-[#F8F9FA] min-h-screen m-0 font-sans text-gray-900 selection:bg-[#38A169] selection:text-white">
-
-  <div class="max-w-6xl mx-auto px-4 py-8">
-    
-    <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
-      <div>
-        <h1 class="text-4xl font-black tracking-tighter uppercase">Signal Atlas</h1>
-        <p class="text-[11px] font-['JetBrains_Mono'] text-gray-400 uppercase tracking-[0.3em]">
-          Global Signal Footprint // 信号通联图谱
-        </p>
-      </div>
-      <a href="/" class="text-[10px] font-['JetBrains_Mono'] border border-gray-200 px-4 py-2 hover:bg-white hover:shadow-sm transition-all flex items-center gap-2 uppercase tracking-widest">
-        <span>←</span> 返回工作台 / Return_to_Console
-      </a>
-    </div>
-
-    <div id="map" class="map-frame rounded-t-2xl overflow-hidden shadow-sm"></div>
-
-    <div class="bg-white border border-gray-200 border-t-0 rounded-b-2xl p-6 md:p-10 shadow-lg font-['JetBrains_Mono']">
-      
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10 items-end">
-        <div class="md:col-span-2 relative">
-            <label class="block text-[10px] text-gray-400 mb-3 uppercase tracking-widest italic">
-                呼号数据库查询 / Query_Callsign_Database
-            </label>
-            <div class="flex items-center gap-4 border-b-2 border-gray-100 focus-within:border-[#38A169] transition-all pb-3">
-                <span class="text-xl font-bold text-[#38A169] select-none">></span>
-                <input 
-                    type="text" 
-                    id="query-input"
-                    placeholder="SCAN CALLSIGN..." 
-                    class="w-full bg-transparent text-3xl font-black text-gray-800 uppercase outline-none placeholder-gray-100"
-                    autocomplete="off"
-                />
-            </div>
-        </div>
-
-        <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 flex justify-around">
-            <div class="text-center">
-                <div class="text-[9px] text-gray-400 uppercase mb-1">通联总数 / Total_QSO</div>
-                <div class="text-2xl font-black text-gray-800" id="total-qso-count">0</div>
-            </div>
-            <div class="w-[1px] bg-gray-200 mx-2"></div>
-            <div class="text-center">
-                <div class="text-[9px] text-gray-400 uppercase mb-1">系统状态 / Status</div>
-                <div class="text-xs font-bold text-[#38A169] mt-2 uppercase tracking-tighter" id="system-status">DATABASE_READY</div>
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-2">
-            <button id="search-btn" class="w-full bg-gray-900 text-white py-3 rounded text-[11px] font-black uppercase hover:bg-[#38A169] transition-all shadow-md tracking-widest">
-                执行追踪 / Execute_Trace
-            </button>
-            <button id="reset-btn" class="w-full bg-white border border-gray-200 text-gray-400 py-2 rounded text-[9px] font-bold uppercase hover:text-gray-600 transition-all">
-                重置图谱 / Reset_Atlas
-            </button>
-        </div>
-      </div>
-
-      <div id="results-display" class="custom-scroll max-h-[300px] overflow-y-auto pr-4 space-y-4">
-          <div class="text-[10px] text-gray-300 uppercase italic tracking-widest text-center py-8">
-            等待遥测指令... / Awaiting telemetry command...
-          </div>
-      </div>
-
-    </div>
-
-    <div class="mt-8 text-center">
-        <p class="text-[9px] font-['JetBrains_Mono'] text-gray-400 uppercase tracking-widest">
-            © BA8BLK / 地图数据由 Leaflet & CartoDB 提供 / 纯前端数据渲染
-        </p>
-    </div>
-  </div>
-
-  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  
-  <script define:vars={{ logbookData: rawQsoData, HOME_GRID }}>
-    // 1. 工具：坐标转换
-    function gridToLatLon(grid) {
-      if (!grid || grid.length < 4) return null;
-      grid = grid.toUpperCase();
-      let lon = (grid.charCodeAt(0) - 65) * 20 - 180;
-      let lat = (grid.charCodeAt(1) - 65) * 10 - 90;
-      lon += (grid.charCodeAt(2) - 48) * 2;
-      lat += (grid.charCodeAt(3) - 48) * 1;
-      if (grid.length >= 6) {
-        lon += (grid.charCodeAt(4) - 65) * (2 / 24) + (1 / 24);
-        lat += (grid.charCodeAt(5) - 65) * (1 / 24) + (0.5 / 24);
-      } else { lon += 1; lat += 0.5; }
-      return [lat, lon];
-    }
-
-    // 2. 初始化地图
-    const homeCoords = gridToLatLon(HOME_GRID);
-    const map = L.map('map', { 
-      center: [25, 100], zoom: 3, zoomControl: true, 
-      scrollWheelZoom: false, attributionControl: false,
-      worldCopyJump: true 
-    });
-    map.zoomControl.setPosition('bottomright');
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
-
-    const historyLayer = L.layerGroup().addTo(map);
-    const focusLayer = L.layerGroup().addTo(map);
-
-    // 3. 渲染历史通联
-    let validQsoCount = 0;
-    logbookData.forEach(qso => {
-      const coords = gridToLatLon(qso.grid || qso.GRIDSQUARE);
-      if (coords) {
-        validQsoCount++;
-        L.polyline([homeCoords, coords], { color: '#38A169', weight: 0.8, opacity: 0.08, interactive: false }).addTo(historyLayer);
-        L.circleMarker(coords, { radius: 1, fillColor: '#38A169', fillOpacity: 0.15, stroke: false, interactive: false }).addTo(historyLayer);
-      }
-    });
-    document.getElementById('total-qso-count').innerText = validQsoCount;
-
-    // 4. 搜索与交互逻辑
-    const inputEl = document.getElementById('query-input');
-    const searchBtn = document.getElementById('search-btn');
-    const resetBtn = document.getElementById('reset-btn');
-    const resultsEl = document.getElementById('results-display');
-    const statusEl = document.getElementById('system-status');
-
-    function performSearch() {
-      const query = inputEl.value.trim().toUpperCase();
-      if (!query) return;
-
-      focusLayer.clearLayers();
-      const hits = logbookData.filter(d => (d.callsign || d.CALL || "").toUpperCase().includes(query));
-
-      if (hits.length > 0) {
-        statusEl.innerText = "TRACE_LOCKED";
-        statusEl.style.color = "#38A169";
-        const bounds = L.latLngBounds([homeCoords]);
-        resultsEl.innerHTML = `<div class="text-[10px] text-[#38A169] mb-4 font-bold uppercase tracking-widest">信号已锁定 / Target_Locked: ${hits.length} Entry Found</div>`;
-
-        hits.forEach(qso => {
-          const callsign = qso.callsign || qso.CALL;
-          const coords = gridToLatLon(qso.grid || qso.GRIDSQUARE);
-          if (coords) {
-            L.polyline([homeCoords, coords], { color: '#38A169', weight: 4, opacity: 0.8, className: 'highlight-trace' }).addTo(focusLayer);
-            L.circleMarker(coords, { radius: 8, fillColor: '#38A169', color: '#fff', weight: 3, fillOpacity: 1 }).addTo(focusLayer).bindPopup(`<b>${callsign}</b>`).openPopup();
-            bounds.extend(coords);
-          }
-          resultsEl.innerHTML += `
-            <div class="bg-gray-50 border-l-4 border-[#38A169] p-5 flex justify-between items-center group hover:bg-gray-100 transition-all">
-              <div>
-                <div class="text-2xl font-black text-gray-800 tracking-tighter">${callsign}</div>
-                <div class="text-[10px] text-gray-400 mt-1 uppercase">${qso.time_on || qso.QSO_DATE} // ${qso.band || qso.BAND} // ${qso.mode || qso.MODE}</div>
-              </div>
-              <div class="text-right">
-                <div class="text-[9px] text-gray-400 uppercase mb-1">信号报告 / RST</div>
-                <div class="text-xl font-bold text-[#38A169]">${qso.rst_rcvd || qso.RST_RCVD}</div>
-              </div>
-            </div>`;
-        });
-        map.flyToBounds(bounds, { padding: [100, 100], duration: 1.5 });
-      } else {
-        statusEl.innerText = "SIGNAL_LOST";
-        statusEl.style.color = "#EF4444";
-        resultsEl.innerHTML = `<div class="text-red-500 font-bold text-[10px] uppercase tracking-widest text-center py-8">[!] 未找到该呼号轨迹 / NO_TRACE_FOUND: ${query}</div>`;
-      }
-    }
-
-    function resetAtlas() {
-        focusLayer.clearLayers();
-        inputEl.value = "";
-        statusEl.innerText = "DATABASE_READY";
-        statusEl.style.color = "#38A169";
-        resultsEl.innerHTML = `<div class="text-[10px] text-gray-300 uppercase italic tracking-widest text-center py-8">等待遥测指令... / Awaiting telemetry command...</div>`;
-        map.flyTo([25, 100], 3);
-    }
-
-    searchBtn.addEventListener('click', performSearch);
-    resetBtn.addEventListener('click', resetAtlas);
-    inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
-  </script>
+<body>
+    <p>QSL 查询已迁移至 <a href={TARGET}>qsl.ba8blk.com</a>，正在跳转……</p>
 </body>
 </html>
