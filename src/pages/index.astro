@@ -142,11 +142,10 @@ import SEO from '../components/SEO.astro';
 
         <div class="flex flex-col gap-3 w-full max-w-md mx-auto">
             {[
-                { id: "SYS_01", en: "QSO LOG", zh: "通联日志", href: "/qso" },
-                { id: "SYS_02", en: "QSL CHECK", zh: "卡片查询", href: "https://qsl.ba8blk.com" },
-                { id: "SYS_03", en: "SIGNAL BLOG", zh: "电波博客", href: "/blog" },
-                { id: "SYS_04", en: "STATION INFO", zh: "台站资料", href: "/about" },
-                { id: "EXT_05", en: "QRZ.COM", zh: "国际档案", href: "https://www.qrz.com/db/BA8BLK", target: "_blank" }
+                { id: "SYS_01", en: "QSO & QSL", zh: "通联与卡片", href: "https://qsl.ba8blk.com" },
+                { id: "SYS_02", en: "SIGNAL BLOG", zh: "电波博客", href: "/blog" },
+                { id: "SYS_03", en: "STATION INFO", zh: "台站资料", href: "/about" },
+                { id: "EXT_04", en: "QRZ.COM", zh: "国际档案", href: "https://www.qrz.com/db/BA8BLK", target: "_blank" }
             ].map((item) => (
                 <a 
                     href={item.href} 
