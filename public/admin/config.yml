@@ -9,9 +9,6 @@ backend:
 media_folder: public/images
 public_folder: /images
 
-# 新文章文件名：日期 + 时分，例如 2026-09-29-1015.md（对应网址 /blog/2026-09-29-1015）
-slug: "{{year}}-{{month}}-{{day}}-{{hour}}{{minute}}"
-
 collections:
   - name: blog
     label: 博客文章
@@ -20,6 +17,7 @@ collections:
     extension: md
     format: yaml-frontmatter
     create: true
+    # 新文章文件名：日期 + 时分，例如 2026-09-29-1015.md（对应网址 /blog/2026-09-29-1015）
     slug: "{{year}}-{{month}}-{{day}}-{{hour}}{{minute}}"
     summary: "{{pubDate}} · {{title}}"
     sortable_fields: [pubDate, title]
