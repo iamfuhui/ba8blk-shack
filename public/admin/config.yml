@@ -27,4 +27,4 @@ collections:
       - { name: pubDate, label: 发布日期, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
       - { name: author, label: 作者, widget: string, required: false, default: BA8BLK }
       - { name: tags, label: 标签, widget: list, required: false }
-      - { name: body, label: 正文, widget: markdown }
+      - { name: body, label: 正文, widget: markdown, modes: [raw, rich_text] }
