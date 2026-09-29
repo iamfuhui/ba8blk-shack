@@ -1,0 +1,32 @@
+# Sveltia CMS 后台配置，访问 /admin
+# 登录方式：GitHub 个人访问令牌（PAT），首次登录时粘贴即可
+backend:
+  name: github
+  repo: iamfuhui/ba8blk-shack
+  branch: main
+
+# 图片上传到 public/images，文章里引用为 /images/xxx
+media_folder: public/images
+public_folder: /images
+
+# 新文章文件名：日期 + 时分，例如 2026-09-29-1015.md（对应网址 /blog/2026-09-29-1015）
+slug: "{{year}}-{{month}}-{{day}}-{{hour}}{{minute}}"
+
+collections:
+  - name: blog
+    label: 博客文章
+    label_singular: 文章
+    folder: src/content/blog
+    extension: md
+    format: yaml-frontmatter
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{hour}}{{minute}}"
+    summary: "{{pubDate}} · {{title}}"
+    sortable_fields: [pubDate, title]
+    fields:
+      - { name: title, label: 标题, widget: string }
+      - { name: description, label: 简介（列表页与 SEO 使用）, widget: string }
+      - { name: pubDate, label: 发布日期, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - { name: author, label: 作者, widget: string, required: false, default: BA8BLK }
+      - { name: tags, label: 标签, widget: list, required: false }
+      - { name: body, label: 正文, widget: markdown }
